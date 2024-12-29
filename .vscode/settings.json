@@ -1,0 +1,24 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode", // Đặt Prettier làm formatter mặc định
+    "editor.formatOnSave": true, // Tự động định dạng khi lưu tệp
+    "prettier.printWidth": 80, // Giới hạn chiều dài dòng ở 80 ký tự, giúp tự động xuống dòng khi vượt quá
+    "prettier.tabWidth": 4, // Thiết lập chiều rộng tab là 4 khoảng trắng
+    "prettier.proseWrap": "always", // Luôn xuống dòng cho các đoạn văn bản dài (như trong markdown hoặc HTML)
+    "prettier.trailingComma": "all", // Thêm dấu phẩy ở cuối trong các danh sách và đối tượng, dễ dàng thêm dòng mới
+    "prettier.htmlWhitespaceSensitivity": "ignore", // Bỏ qua khoảng trắng trong HTML, tránh thay đổi không mong muốn
+    "prettier.jsxSingleQuote": true, // Sử dụng dấu nháy đơn trong JSX (dễ quản lý các chuỗi dài)
+    "prettier.bracketSameLine": false, // Đặt dấu ngoặc `>` ở dòng mới trong JSX, giúp mã dễ đọc hơn
+    "prettier.bracketSpacing": true, // Thêm khoảng trắng bên trong các ngoặc, tăng độ rõ ràng của mã
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    }
+}
