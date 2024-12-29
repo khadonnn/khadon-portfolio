@@ -1,7 +1,5 @@
-###npm run dev
-# Khadon - Portfolio
-
-## Features in this project:
+### Khadon - Portfolio:
+## Features in this project: 
 
 - Next.js 13 features
 - Next.js App Router
@@ -16,12 +14,3 @@
 - Fresh, modern UI design
 - Light & Dark mode
 - Responsive website
-
-## Important
-
-
-
-## Setup
-
-1. Add RESEND_API_KEY environment variable in .env.local
-2. In the send-email.ts action file, change the "to" email to your own email
