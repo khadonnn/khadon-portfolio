@@ -1,10 +1,9 @@
-[![Watch tutorial here](https://img.youtube.com/vi/sUKptmUVIBM/0.jpg)](https://youtu.be/sUKptmUVIBM)
+###npm run dev
+# Khadon - Portfolio
 
-# [Watch video here](https://youtu.be/sUKptmUVIBM)
+## Features in this project:
 
-## What you will learn
-
-- Latest Next.js 13 features
+- Next.js 13 features
 - Next.js App Router
 - Next.js Server Actions
 - Client & Server Components
@@ -20,9 +19,7 @@
 
 ## Important
 
-If you want to be a professional developer, you have to know the fundamentals like JavaScript and CSS really well. I highly recommend you go through my [Professional JavaScript](https://bytegrad.com/courses/professional-javascript) and [Professional CSS](https://bytegrad.com/courses/professional-css) courses.
 
-I'm close to releasing a complete React & Next.js course. Get on the email list to receive early-bird pricing: [link](https://email.bytegrad.com/).
 
 ## Setup
 
