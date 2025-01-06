@@ -2,9 +2,9 @@ import React from "react";
 import { CgWorkAlt } from "react-icons/cg";
 import { FaReact } from "react-icons/fa";
 import { LuGraduationCap } from "react-icons/lu";
-import corpcommentImg from "@/public/corpcomment.png";
-import rmtdevImg from "@/public/rmtdev.png";
-import wordanalyticsImg from "@/public/wordanalytics.png";
+import chat_app from "@/public/chat_app.png";
+import order_food from "@/public/order_food.png";
+import store_shop from "@/public/store_shop.png";
 
 export const links = [
     {
@@ -35,52 +35,55 @@ export const links = [
 
 export const experiencesData = [
     {
-        title: "Graduated bootcamp",
-        location: "Miami, FL",
+        title: "Business Administration ",
+        location: "TDTU-University",
         description:
-            "I graduated after 6 months of studying. I immediately found a job as a front-end developer.",
+            "I graduated after 4 years of studying. I have a bachelor's degree in Business Administration.  ",
         icon: React.createElement(LuGraduationCap),
-        date: "2019",
+        score: "GPA: 7.1/10",
+        date: "2018 - 2023",
     },
     {
         title: "Front-End Developer",
-        location: "Orlando, FL",
+        location: "University of Science - VNUHCM",
         description:
-            "I worked as a front-end developer for 2 years in 1 job and 1 year in another job. I also upskilled to the full stack.",
+            "I graduated after 4 months of studying. I have enhanced my skills in JavaScript, Bootstrap, Node.js, Cloudinary and MongoDB. ",
         icon: React.createElement(CgWorkAlt),
-        date: "2019 - 2021",
+        score: "GPA: 8.5/10",
+        date: "02/2024-06/2024",
     },
     {
         title: "Full-Stack Developer",
-        location: "Houston, TX",
+        location: "UIT-CITD-University of Information Technology",
         description:
-            "I'm now a full-stack developer working as a freelancer. My stack includes React, Next.js, TypeScript, Tailwind, Prisma and MongoDB. I'm open to full-time opportunities.",
+            "Studying for a second degree in web technology. My stack includes React, Next.js, TypeScript, Tailwind, Cloudinary and MongoDB.",
         icon: React.createElement(FaReact),
-        date: "2021 - present",
+        score: "",
+        date: "08/2024 - present",
     },
 ] as const;
 
 export const projectsData = [
     {
-        title: "CorpComment",
+        title: "Chit Chat",
         description:
-            "I worked as a full-stack developer on this startup project for 2 years. Users can give public feedback to companies.",
-        tags: ["React", "Next.js", "MongoDB", "Tailwind", "Prisma"],
-        imageUrl: corpcommentImg,
+            "This is a chat app offering real-time messaging, file sharing, and seamless communication for everyone.",
+        tags: ["React", "Firebase", "Tailwind", "Antd"],
+        imageUrl: chat_app,
     },
     {
-        title: "rmtDev",
+        title: "Store Shop",
         description:
-            "Job board for remote developer jobs. I was the front-end developer. It has features like filtering, sorting and pagination.",
-        tags: ["React", "TypeScript", "Next.js", "Tailwind", "Redux"],
-        imageUrl: rmtdevImg,
+            "This website offers fashion products and furniture with convenient shopping features, high quality, and beauty designs.",
+        tags: ["React", "Next.js", "Wix", "Tailwind", "Stripe", "Zustand"],
+        imageUrl: store_shop,
     },
     {
-        title: "Word Analytics",
+        title: "Order Food",
         description:
-            "A public web app for quick analytics on text. It shows word count, character count and social media post limits.",
-        tags: ["React", "Next.js", "SQL", "Tailwind", "Framer"],
-        imageUrl: wordanalyticsImg,
+            "This website provides fast food services for stores, featuring a posting system to share cooking ingredients.",
+        tags: ["React", "useContext", "Css"],
+        imageUrl: order_food,
     },
 ] as const;
 
@@ -89,17 +92,20 @@ export const skillsData = [
     "CSS",
     "Framer Motion",
     "Tailwind",
+    "Antd",
+    "MUI",
+    "Shadcn/ui",
     "Bootstrap",
     "JavaScript",
     "React",
     "Nextjs",
     "TypeScript",
-    "Next.js",
+    "Nextjs",
     "Git",
     "MongoDB",
     "Firebase",
-    "Express",
+    "Wix",
+    "Expressjs",
     "FastAPI",
     "Stripe",
-    "Wix",
 ] as const;
