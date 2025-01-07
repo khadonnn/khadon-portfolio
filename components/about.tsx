@@ -20,9 +20,10 @@ export default function About() {
             <SectionHeading>About Me</SectionHeading>
             <p className='mb-3'>
                 After graduating with a degree in{" "}
-                <span className='font-medium'>Busines Administration</span>, I
-                decided to pursue my passion for programming. I enrolled in a
-                coding bootcamp and learned{" "}
+                <span className='font-medium'>Busines Administration at</span>{" "}
+                <span className='underline'>TDTU</span>. I decided to pursue my
+                passion for programming. I enrolled in a coding bootcamp and
+                learned{" "}
                 <span className='font-medium'>full-stack web development</span>.{" "}
                 <span className='italic'>My favorite part of programming</span>{" "}
                 is the problem-solving aspect. I{" "}
@@ -45,7 +46,7 @@ export default function About() {
                 Currently, I am pursuing a{" "}
                 <span className='underline'>Second degree</span>, where I focus
                 on deepening my knowledge and honing my expertise in the field.
-                I am enrolled at the
+                I am enrolled at the{" "}
                 <span className='font-medium underline'>
                     University of Information Technology - CITD
                 </span>
