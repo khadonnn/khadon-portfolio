@@ -9,7 +9,6 @@ import {
     Preview,
     Section,
     Text,
-    Img,
 } from "@react-email/components";
 import { Tailwind } from "@react-email/tailwind";
 
@@ -30,16 +29,10 @@ export default function ContactFormEmail({
                 <Body className='bg-gray-100 text-black'>
                     <Container>
                         <Section className='bg-white borderBlack my-10 px-10 py-4 rounded-md'>
-                            <Img
-                                src={`${process.env.NEXT_PUBLIC_DOMAIN_POR}/kd_logo.svg`}
-                                alt='Logo'
-                                width='100'
-                                height='100'
-                            />
-                            <Heading className='leading-tight'>
+                            <Text className='leading-tight font-bold'>
                                 You received the following message from the
-                                contact form
-                            </Heading>
+                                Portfolio form
+                            </Text>
                             <Text>{message}</Text>
                             <Hr />
                             <Text>The sender's email is: {senderEmail}</Text>
