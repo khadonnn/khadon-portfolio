@@ -71,8 +71,8 @@ export default function Contact() {
                 />
                 <SubmitBtn />
             </form>
-            <div className='bg-[#f5e0e0] absolute bottom-[6rem] -z-10 right-[11rem] h-[10.25rem] w-[10.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#bb5d83]'></div>
-            <div className='bg-[#f4e2fa] absolute bottom-[1rem] -z-10 left-[-35rem] h-[10.25rem] w-[10rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#6a4196]'></div>
+            <div className='bg-[#f9d2d2] absolute bottom-[8rem] -z-10 right-[11rem] h-[10.25rem] w-[10.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#bb5d83aa]'></div>
+            <div className='bg-[#d6aae4] absolute bottom-[8rem] -z-10 left-[-35rem] h-[10.25rem] w-[10rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#794aabb1]'></div>
         </motion.section>
     );
 }
