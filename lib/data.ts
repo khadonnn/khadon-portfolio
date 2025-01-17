@@ -16,6 +16,10 @@ export const links = [
         hash: "#about",
     },
     {
+        name: "Certificate",
+        hash: "#certificate",
+    },
+    {
         name: "Projects",
         hash: "#projects",
     },
@@ -47,7 +51,7 @@ export const experiencesData = [
         title: "Front-End Developer",
         location: "University of Science - VNUHCM",
         description:
-            "I graduated after 4 months of studying. I have enhanced my skills in JavaScript, Bootstrap, Node.js, Cloudinary and MongoDB. ",
+            "I graduated after 4 months of studying. I have enhanced my skills in JavaScript, Bootstrap, Node.js, Cloudinary and MongoDB.",
         icon: React.createElement(CgWorkAlt),
         score: "GPA: 8.5/10",
         date: "02/2024-06/2024",
@@ -63,6 +67,21 @@ export const experiencesData = [
     },
 ] as const;
 
+export const certificates = [
+    {
+        title: "VNUHCM - University of Science ",
+        description:
+            "JavaScript, Bootstrap, Node.js, Cloudinary and MongoDB. Score: 8.5/10 ",
+        imageSrc: "/Certificate.jpg",
+        altText: "thumbnail",
+    },
+    {
+        title: "TDTU-University",
+        description: "Business Administration GPA: 7.1/10",
+        imageSrc: "/certificate2.jpg",
+        altText: "thumbnail2",
+    },
+] as const;
 export const projectsData = [
     {
         title: "Chit Chat",

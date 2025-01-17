@@ -1,4 +1,5 @@
 import About from "@/components/about";
+import { Certificate } from "@/components/certification";
 import Contact from "@/components/contact";
 import Experience from "@/components/experience";
 import Intro from "@/components/intro";
@@ -12,6 +13,7 @@ export default function Home() {
             <Intro />
             <SectionDivider />
             <About />
+            <Certificate />
             <Projects />
             <Skills />
             <Experience />
