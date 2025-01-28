@@ -4,6 +4,7 @@ import { FaReact } from "react-icons/fa";
 import { LuGraduationCap } from "react-icons/lu";
 import chat_app from "@/public/chat_app.png";
 import order_food from "@/public/order_food.png";
+import kblog from "@/public/kblog.png";
 import store_shop from "@/public/store_shop.png";
 
 export const links = [
@@ -89,6 +90,7 @@ export const projectsData = [
             "This is a chat app offering real-time messaging, file sharing, and seamless communication for everyone.",
         tags: ["React", "Firebase", "Tailwind", "Antd"],
         imageUrl: chat_app,
+        url: "https://chitchat-khadon.vercel.app/",
     },
     {
         title: "Store Shop",
@@ -96,13 +98,24 @@ export const projectsData = [
             "This website offers fashion products and furniture with convenient shopping features, high quality, and beauty designs.",
         tags: ["React", "Next.js", "Wix", "Tailwind", "Stripe", "Zustand"],
         imageUrl: store_shop,
+        url: "https://nextjs-shop-ten-tawny.vercel.app/",
     },
     {
-        title: "Order Food",
+        title: "Blog App",
         description:
-            "This website provides fast food services for stores, featuring a posting system to share cooking ingredients.",
-        tags: ["React", "useContext", "Css"],
-        imageUrl: order_food,
+            "This is a blog app that allows user to write and admin can edit or delete blog posts.",
+        tags: [
+            "React",
+            "Nextjs",
+            "Css",
+            "Cloudinary",
+            "MongoDB",
+            "Next-auth",
+            "SWR",
+            "Prisma",
+        ],
+        imageUrl: kblog,
+        url: "https://k-blog-theta.vercel.app/",
     },
 ] as const;
 
