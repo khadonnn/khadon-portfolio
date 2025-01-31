@@ -82,6 +82,12 @@ export const certificates = [
         imageSrc: "/certificate2.jpg",
         altText: "thumbnail2",
     },
+    {
+        title: "Coursera React",
+        description: "Certification of React in Coursera",
+        imageSrc: "/courseraReact.jpg",
+        altText: "courseraReact",
+    },
 ] as const;
 export const projectsData = [
     {
@@ -110,6 +116,7 @@ export const projectsData = [
             "Css",
             "Cloudinary",
             "MongoDB",
+            "React-quill",
             "Next-auth",
             "SWR",
             "Prisma",
