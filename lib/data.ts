@@ -88,6 +88,12 @@ export const certificates = [
         imageSrc: "/courseraReact.jpg",
         altText: "courseraReact",
     },
+    {
+        title: "IELTS Certificate",
+        description: "Certification of IELTS from IDP",
+        imageSrc: "/IELTS.jpg",
+        altText: "IELTS",
+    },
 ] as const;
 export const projectsData = [
     {
