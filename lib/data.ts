@@ -74,23 +74,27 @@ export const certificates = [
         description:
             "JavaScript, Bootstrap, Node.js, Cloudinary and MongoDB. Score: 8.5/10 ",
         imageSrc: "/Certificate.jpg",
+        slug: "JavaScript",
         altText: "thumbnail",
     },
     {
         title: "TDTU-University",
         description: "Business Administration GPA: 7.1/10",
         imageSrc: "/certificate2.jpg",
+        slug: "TDTU",
         altText: "thumbnail2",
     },
     {
         title: "Coursera React",
         description: "Certification of React in Coursera",
+        slug: "Coursera-React",
         imageSrc: "/courseraReact.jpg",
         altText: "courseraReact",
     },
     {
         title: "IELTS Certificate",
         description: "Certification of IELTS from IDP",
+        slug: "IELTS-certificate",
         imageSrc: "/IELTS.jpg",
         altText: "IELTS",
     },

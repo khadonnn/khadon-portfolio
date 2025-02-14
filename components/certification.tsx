@@ -7,21 +7,30 @@ import { useSectionInView } from "@/lib/hooks";
 import SectionHeading from "@/components/section-heading";
 import { motion } from "framer-motion";
 import { certificates } from "@/lib/data";
-
+import { useRouter } from "next/navigation";
 export function Certificate() {
     const { ref } = useSectionInView("Certificate");
     const [open, setOpen] = useState(false);
     const [imageSrc, setImageSrc] = useState("");
-
+    const router = useRouter();
     useEffect(() => {
         if (typeof window !== "undefined") {
             document.body.style.overflow = open ? "hidden" : "auto";
         }
     }, [open]);
+    useEffect(() => {
+        const handleRouteChange = () => {
+            setOpen(false);
+        };
 
-    const handleOpenModal = (certificate: { imageSrc: string }) => {
-        setImageSrc(certificate.imageSrc);
+        window.addEventListener("popstate", handleRouteChange);
+        return () => {
+            window.removeEventListener("popstate", handleRouteChange);
+        };
+    }, []);
+    const handleOpenModal = (certificate: { slug: string }) => {
         setOpen(true);
+        router.push(`/certificate/${certificate.slug}`);
     };
 
     return (

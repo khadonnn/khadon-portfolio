@@ -30,7 +30,7 @@ const Intro = () => {
                         }}
                     >
                         <Image
-                            src={"/avt.png"}
+                            src={"/avt4.png"}
                             alt='khadon'
                             width={200}
                             height={200}
