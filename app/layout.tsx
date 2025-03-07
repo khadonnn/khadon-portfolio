@@ -9,8 +9,8 @@ import Footer from "@/components/footer";
 import ThemeSwitch from "@/components/theme-switch";
 
 export const metadata = {
-    title: "KhaDon | Personal Portfolio",
-    description: "Full-Stack Developer.",
+    title: "Khadondev | Personal Portfolio",
+    description: "Khadon - Frontend Developer about Web application",
 };
 
 export default function RootLayout({
