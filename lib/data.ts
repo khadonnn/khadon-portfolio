@@ -2,8 +2,9 @@ import React from "react";
 import { CgWorkAlt } from "react-icons/cg";
 import { FaReact } from "react-icons/fa";
 import { LuGraduationCap } from "react-icons/lu";
-import chat_app from "@/public/chat_app.png";
-import order_food from "@/public/order_food.png";
+// import chat_app from "@/public/chat_app.png";
+// import order_food from "@/public/order_food.png";
+import pern_store from "@/public/pern_store.png";
 import kblog from "@/public/kblog.png";
 import store_shop from "@/public/store_shop.png";
 
@@ -101,13 +102,29 @@ export const certificates = [
 ] as const;
 export const projectsData = [
     {
-        title: "Chit Chat",
+        title: "Pern Store",
         description:
-            "This is a chat app offering real-time messaging, file sharing, and seamless communication for everyone.",
-        tags: ["React", "Firebase", "Tailwind", "Antd"],
-        imageUrl: chat_app,
-        url: "https://chitchat-khadon.vercel.app/",
+            "This is a basic project with features related to CRUD, RESTful API, and PostgreSQL.",
+        tags: [
+            "Node.js",
+            "Express.js",
+            "PostgreSQL",
+            "MongoDB",
+            "Tailwind",
+            "Daisyui",
+            "Arcjet",
+        ],
+        imageUrl: pern_store,
+        url: "https://pern-store-fs5d.onrender.com/",
     },
+    // {
+    //     title: "Chit Chat",
+    //     description:
+    //         "This is a chat app offering real-time messaging, file sharing, and seamless communication for everyone.",
+    //     tags: ["React", "Firebase", "Tailwind", "Antd"],
+    //     imageUrl: chat_app,
+    //     url: "https://chitchat-khadon.vercel.app/",
+    // },
     {
         title: "Store Shop",
         description:
@@ -122,7 +139,7 @@ export const projectsData = [
             "This is a blog app that allows user to write and admin can edit or delete blog posts.",
         tags: [
             "React",
-            "Nextjs",
+            "Next.js",
             "Css",
             "Cloudinary",
             "MongoDB",
