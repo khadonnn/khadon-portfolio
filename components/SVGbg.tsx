@@ -1,18 +1,118 @@
-import React from "react";
+"use client";
+import React, { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+    gsap.registerPlugin(ScrollTrigger);
+}
 
 const SVGbg = () => {
+    const pathRef = useRef<SVGPathElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        const path = pathRef.current;
+        const container = containerRef.current;
+        if (!path || !container) return;
+
+        const pathLength = path.getTotalLength();
+
+        // Reset nét vẽ về trạng thái ẩn ban đầu
+        gsap.set(path, {
+            strokeDasharray: pathLength,
+            strokeDashoffset: pathLength,
+        });
+
+        // reveal the path only after dash values were set to prevent initial flash
+        try {
+            path.style.visibility = "visible";
+        } catch (e) {
+            // ignore
+        }
+
+        // Ensure the svg container covers the full scrollable height of the parent (`main`)
+        const parent = container.parentElement as HTMLElement | null;
+        const triggerEl = parent || container;
+
+        const updateContainerHeight = () => {
+            try {
+                const h =
+                    triggerEl.scrollHeight ||
+                    triggerEl.clientHeight ||
+                    document.documentElement.clientHeight;
+                container.style.height = `${h}px`;
+            } catch (e) {
+                // ignore
+            }
+        };
+
+        updateContainerHeight();
+
+        // watch for resizes or content changes
+        let ro: ResizeObserver | null = null;
+        if (typeof ResizeObserver !== "undefined" && parent) {
+            ro = new ResizeObserver(() => updateContainerHeight());
+            ro.observe(parent);
+        } else {
+            window.addEventListener("resize", updateContainerHeight);
+        }
+
+        let ctx = gsap.context(() => {
+            gsap.to(path, {
+                strokeDashoffset: 0,
+                ease: "none",
+                scrollTrigger: {
+                    // use the parent `main` as the trigger so the animation maps to the sections scroll
+                    trigger: triggerEl,
+                    // start when the top of the trigger reaches 90% of viewport (lower on screen)
+                    // and finish when the bottom of trigger reaches 10% (keeps drawing inside visible area)
+                    start: "top 50%",
+                    end: "bottom 90%",
+                    scrub: 1,
+                    // markers: true, // enable for debugging
+                },
+            });
+        }, containerRef);
+
+        return () => {
+            ctx.revert();
+            if (ro && parent) ro.disconnect();
+            else window.removeEventListener("resize", updateContainerHeight);
+        };
+    }, []);
+
     return (
-        <div>
+        <div
+            ref={containerRef}
+            className='svg-bg-container'
+            // Đảm bảo container nằm đúng vị trí tuyệt đối so với cha
+            style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                zIndex: -1,
+                overflow: "hidden",
+            }}
+        >
             <svg
-                width='1355'
-                height='3001'
-                viewBox='0 0 1355 3001'
+                className='svg-bg'
+                viewBox='0 0 1355 2026'
                 fill='none'
                 xmlns='http://www.w3.org/2000/svg'
+                // QUAN TRỌNG: preserveAspectRatio="none" buộc SVG co giãn theo đúng chiều cao thẻ cha bất kể tỷ lệ gốc
+                preserveAspectRatio='none'
+                style={{ width: "100%", height: "100%", display: "block" }}
             >
                 <path
-                    d='M669.274 0.455826C669.274 0.455826 -36.7703 305.157 20.5342 643.883C93.5261 1075.34 908.771 117.568 1216.83 449.631C1572.97 833.524 300.383 1426.75 73.7285 1200.56C-152.926 974.378 1236.32 980.376 1245.16 1409.18C1252.09 1745.29 486.871 1641.75 539.757 1974.38C590.752 2295.11 1212.36 2054.92 1339.99 2357.03C1532.63 2813.04 -261.282 2300.45 33.2546 2707.75C179.235 2909.61 628.222 3000.46 628.222 3000.46'
-                    stroke='black'
+                    ref={pathRef}
+                    className='svg-path'
+                    d='M652.549 0.455826C652.549 0.455826 -53.4957 305.157 3.80881 643.883C76.8007 1075.34 875.041 710.393 1183.1 1042.46C1539.24 1426.35 482.599 1157.96 205.599 1265.96C-71.4007 1373.96 66.5993 1635.46 205.599 1742.96C462.494 1941.63 1195.63 2054.92 1323.26 2357.03C1515.9 2813.04 -252.401 2474.46 120.599 2789.96C310.802 2950.84 611.497 3000.46 611.497 3000.46'
+                    stroke='#909090'
+                    strokeWidth={10} // Có thể giảm xuống 3-5 nếu nét bị to quá khi kéo giãn
+                    vectorEffect='non-scaling-stroke' // Giữ độ dày nét vẽ không bị méo khi SVG bị kéo giãn
                 />
             </svg>
         </div>
