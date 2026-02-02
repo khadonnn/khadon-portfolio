@@ -9,15 +9,19 @@ import Skills from "@/components/skills";
 
 export default function Home() {
     return (
-        <main className='flex flex-col items-center px-4'>
-            <Intro />
-            <SectionDivider />
-            <About />
-            <Certificate />
-            <Projects />
-            <Skills />
-            <Experience />
+        <>
+            <header className="flex flex-col items-center px-4'">
+                <Intro />
+            </header>
+            <main className='flex flex-col items-center px-4'>
+                <SectionDivider />
+                <About />
+                <Certificate />
+                <Projects />
+                <Skills />
+                <Experience />
+            </main>
             <Contact />
-        </main>
+        </>
     );
 }

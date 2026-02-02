@@ -8,9 +8,11 @@ import { FaGithubSquare } from "react-icons/fa";
 import Link from "next/link";
 import { useSectionInView } from "@/lib/hooks";
 import { useActiveSectionContext } from "@/context/active-section-context";
+import { FlipWords } from "./ui/flip-words";
 const Intro = () => {
     const { ref } = useSectionInView("Home");
     const { setActiveSection, setTimeOfLastClick } = useActiveSectionContext();
+    const words = ["Next.js", "React", "Full-Stack Dev"];
     return (
         <section
             id='home'
@@ -62,7 +64,11 @@ const Intro = () => {
                 <span className='font-bold'>full-stack developer</span> with{" "}
                 <span className='font-bold'>8 months</span> of experience. I
                 enjoy building <span className='italic'>websites & apps</span>.
-                My focus is <span className='underline'>React (Next.js)</span>.
+                My focus is{" "}
+                <strong>
+                    <FlipWords words={words} />
+                </strong>{" "}
+                <br />
             </motion.h2>
             <motion.div
                 className='flex flex-col sm:flex-row items-center justify-center gap-2 px-4 text-lg font-medium'
