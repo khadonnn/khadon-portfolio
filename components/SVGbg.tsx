@@ -73,8 +73,8 @@ const SVGbg = () => {
                     scrollTrigger: {
                         id: "svg-bg-draw",
                         trigger: triggerEl,
-                        // Start only when main section is well into viewport (after scroll animation)
-                        start: "top 10%",
+                        // Chỉ bắt đầu khi scroll animation đã qua (about section vào viewport)
+                        start: "top 60%",
                         end: "bottom 80%",
                         scrub: 1,
                         invalidateOnRefresh: true,

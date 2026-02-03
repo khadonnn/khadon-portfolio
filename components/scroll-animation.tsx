@@ -9,9 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function HeroScrollAnimation() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null); // Ref cho chữ
-    const [imagesLoaded, setImagesLoaded] = useState(false);
-    const [loadProgress, setLoadProgress] = useState(0);
+    const textRef = useRef<HTMLDivElement>(null);
     const [loadError, setLoadError] = useState(false);
     const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -26,7 +24,7 @@ export default function HeroScrollAnimation() {
         if (!context) return;
 
         // --- CẤU HÌNH ---
-        const frameCount = 210;
+        const frameCount = 120;
         const currentFrame = (index: number) =>
             `/assets/snow/ezgif-frame-${String(index).padStart(3, "0")}.png`;
 
@@ -55,17 +53,15 @@ export default function HeroScrollAnimation() {
         let errorCount = 0;
         let lastProgressUpdate = 0;
         const MAX_ERRORS = 30;
-        const BATCH_SIZE = 10; // Tải 10 ảnh mỗi lần
-        const PROGRESS_UPDATE_THRESHOLD = 5; // Chỉ update UI khi tăng >= 5%
+        const BATCH_SIZE = 15; // Tải 15 ảnh mỗi lần
 
-        // Timeout 15s cho môi trường mạng chậm
+        // Timeout 20s - nếu quá lâu thì bỏ qua animation
         loadTimeoutRef.current = setTimeout(() => {
-            if (!imagesLoaded && loadedCount < frameCount * 0.3) {
-                console.warn("Loading timeout - skipping animation");
+            if (loadedCount < frameCount * 0.5) {
+                console.warn("Loading timeout - continuing anyway");
                 setLoadError(true);
-                setImagesLoaded(true);
             }
-        }, 15000);
+        }, 20000);
 
         // Khởi tạo mảng ảnh
         for (let i = 1; i <= frameCount; i++) {
@@ -164,36 +160,15 @@ export default function HeroScrollAnimation() {
             });
         };
 
-        // Debounced progress update để tránh re-render liên tục
-        const updateProgress = () => {
-            const progress = Math.round((loadedCount / frameCount) * 100);
-
-            // Chỉ update khi tăng >= 5% để giảm re-render
-            if (progress - lastProgressUpdate >= PROGRESS_UPDATE_THRESHOLD) {
-                requestAnimationFrame(() => {
-                    setLoadProgress(progress);
-                });
-                lastProgressUpdate = progress;
-            }
-
-            // Chỉ cho phép scroll khi load đủ 30% ảnh
-            if (loadedCount >= frameCount * 0.3 && !imagesLoaded) {
-                setImagesLoaded(true);
-                if (loadTimeoutRef.current) {
-                    clearTimeout(loadTimeoutRef.current);
-                }
-            }
-        };
-
         // Load ảnh đầu tiên (Critical)
         images[0].onload = () => {
             firstImageLoaded = true;
             loadedCount++;
-            setLoadProgress(1);
+            console.log("First frame loaded");
 
             render();
 
-            // Init animation ngay sau ảnh đầu NHƯNG chưa cho scroll
+            // Init animation ngay sau ảnh đầu
             if (!animationInitialized) {
                 animationInitialized = true;
                 requestAnimationFrame(() => {
@@ -205,7 +180,6 @@ export default function HeroScrollAnimation() {
         images[0].onerror = (e) => {
             console.error("Failed to load first image:", e);
             setLoadError(true);
-            setImagesLoaded(true);
             if (loadTimeoutRef.current) {
                 clearTimeout(loadTimeoutRef.current);
             }
@@ -229,7 +203,13 @@ export default function HeroScrollAnimation() {
 
                     img.onload = () => {
                         loadedCount++;
-                        updateProgress();
+
+                        // Log progress nhẹ (mỗi 20%)
+                        if (loadedCount % Math.floor(frameCount / 5) === 0) {
+                            console.log(
+                                `Loaded ${loadedCount}/${frameCount} frames`,
+                            );
+                        }
 
                         // Clear timeout khi load đủ 50%
                         if (
@@ -247,7 +227,6 @@ export default function HeroScrollAnimation() {
                         if (errorCount > MAX_ERRORS) {
                             console.error("Too many errors - skipping");
                             setLoadError(true);
-                            setImagesLoaded(true);
                             if (loadTimeoutRef.current) {
                                 clearTimeout(loadTimeoutRef.current);
                             }
@@ -263,14 +242,14 @@ export default function HeroScrollAnimation() {
 
             // Delay giữa batch thường, không delay cho critical batch
             if (!priority) {
-                await new Promise((resolve) => setTimeout(resolve, 50));
+                await new Promise((resolve) => setTimeout(resolve, 20));
             }
         };
 
         // Load images theo chiến lược: Critical frames trước, sau đó mới batch loading
         const loadAllImages = async () => {
-            // Phase 1: Load critical frames (30 ảnh đầu) - KHÔNG delay
-            const criticalFrames = Math.min(30, frameCount);
+            // Phase 1: Load critical frames (15 ảnh đầu) - KHÔNG delay
+            const criticalFrames = Math.min(15, frameCount);
             console.log("Loading critical frames...");
             await loadImageBatch(1, criticalFrames, true);
 
@@ -280,8 +259,8 @@ export default function HeroScrollAnimation() {
                 await loadImageBatch(i, i + BATCH_SIZE, false);
             }
 
-            // Update cuối cùng
-            setLoadProgress(100);
+            // Hoàn tất
+            console.log(`All ${frameCount} frames loaded successfully`);
         };
 
         // Bắt đầu load sau 100ms
@@ -313,12 +292,12 @@ export default function HeroScrollAnimation() {
                         id: "hero-scroll-animation",
                         trigger: container,
                         start: "top top",
-                        end: "+=4000",
-                        scrub: 0.5,
+                        end: "+=2000", // Giảm xuống 2000px để scroll ngắn hơn với 120 frames
+                        scrub: 0.3, // Giảm scrub để responsive hơn
                         pin: true,
                         anticipatePin: 1,
                         invalidateOnRefresh: true,
-                        fastScrollEnd: true, // Tối ưu cho scroll nhanh
+                        fastScrollEnd: true,
                     },
                 });
 
@@ -427,51 +406,6 @@ export default function HeroScrollAnimation() {
                     Scroll to experience the magic
                 </h2>
             </div>
-
-            {/* Loading - Glassmorphism Overlay */}
-            {!imagesLoaded && (
-                <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md'>
-                    <div className='flex flex-col items-center gap-6 p-8 rounded-2xl bg-white/10 dark:bg-black/30 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl'>
-                        {/* Spinner Animation */}
-                        <div className='relative w-20 h-20'>
-                            {/* Outer ring */}
-                            <div className='absolute inset-0 rounded-full border-4 border-white/20 dark:border-gray-700/50'></div>
-                            {/* Spinning ring */}
-                            <div className='absolute inset-0 rounded-full border-4 border-transparent border-t-white dark:border-t-gray-300 animate-spin'></div>
-                            {/* Inner pulse */}
-                            <div className='absolute inset-2 rounded-full bg-white/20 dark:bg-gray-300/20 animate-pulse'></div>
-                        </div>
-
-                        {/* Text */}
-                        <div className='text-center'>
-                            <p className='text-lg font-semibold text-white drop-shadow-lg mb-1'>
-                                {loadError ? "Loading Failed" : "Loading ..."}
-                            </p>
-                            {!loadError && loadProgress > 0 && (
-                                <p className='text-sm text-white/80 dark:text-gray-300'>
-                                    {loadProgress}% complete
-                                </p>
-                            )}
-                            {loadError && (
-                                <p className='text-xs text-red-300 mt-2 max-w-xs'>
-                                    Animation could not be loaded. The page will
-                                    continue without it.
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Progress bar */}
-                        {!loadError && loadProgress > 0 && (
-                            <div className='w-64 h-2 bg-white/20 dark:bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm'>
-                                <div
-                                    className='h-full bg-gradient-to-r from-white to-gray-200 dark:from-gray-300 dark:to-gray-400 transition-all duration-300 ease-out shadow-lg'
-                                    style={{ width: `${loadProgress}%` }}
-                                ></div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
         </section>
     );
 }
