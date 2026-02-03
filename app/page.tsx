@@ -7,6 +7,7 @@ import Projects from "@/components/projects";
 import SectionDivider from "@/components/section-divider";
 import Skills from "@/components/skills";
 import SVGbg from "@/components/SVGbg";
+import ScrollAnimation from "@/components/scroll-animation";
 
 export default function Home() {
     return (
@@ -14,6 +15,7 @@ export default function Home() {
             <header className="flex flex-col items-center px-4'">
                 <Intro />
             </header>
+            <ScrollAnimation />
             <main className='relative flex flex-col items-center px-4 w-full overflow-hidden'>
                 <SVGbg />
                 <SectionDivider />

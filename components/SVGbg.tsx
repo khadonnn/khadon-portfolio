@@ -47,32 +47,44 @@ const SVGbg = () => {
             }
         };
 
-        updateContainerHeight();
+        // Delay initial height calculation
+        setTimeout(() => {
+            updateContainerHeight();
+        }, 100);
 
         // watch for resizes or content changes
         let ro: ResizeObserver | null = null;
         if (typeof ResizeObserver !== "undefined" && parent) {
-            ro = new ResizeObserver(() => updateContainerHeight());
+            ro = new ResizeObserver(() => {
+                // Debounce resize updates
+                setTimeout(updateContainerHeight, 50);
+            });
             ro.observe(parent);
         } else {
             window.addEventListener("resize", updateContainerHeight);
         }
 
         let ctx = gsap.context(() => {
-            gsap.to(path, {
-                strokeDashoffset: 0,
-                ease: "none",
-                scrollTrigger: {
-                    // use the parent `main` as the trigger so the animation maps to the sections scroll
-                    trigger: triggerEl,
-                    // start when the top of the trigger reaches 90% of viewport (lower on screen)
-                    // and finish when the bottom of trigger reaches 10% (keeps drawing inside visible area)
-                    start: "top 50%",
-                    end: "bottom 90%",
-                    scrub: 1,
-                    // markers: true, // enable for debugging
-                },
-            });
+            // Delay animation start to ensure other ScrollTriggers are ready
+            setTimeout(() => {
+                gsap.to(path, {
+                    strokeDashoffset: 0,
+                    ease: "none",
+                    scrollTrigger: {
+                        id: "svg-bg-draw",
+                        trigger: triggerEl,
+                        // Start only when main section is well into viewport (after scroll animation)
+                        start: "top 10%",
+                        end: "bottom 80%",
+                        scrub: 1,
+                        invalidateOnRefresh: true,
+                        // markers: true, // enable for debugging
+                    },
+                });
+
+                // Refresh sau khi init
+                ScrollTrigger.refresh();
+            }, 200);
         }, containerRef);
 
         return () => {
