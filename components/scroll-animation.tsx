@@ -12,6 +12,8 @@ export default function HeroScrollAnimation() {
     const textRef = useRef<HTMLDivElement>(null); // Ref cho chữ
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [loadProgress, setLoadProgress] = useState(0);
+    const [loadError, setLoadError] = useState(false);
+    const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -50,6 +52,17 @@ export default function HeroScrollAnimation() {
         let loadedCount = 0;
         let firstImageLoaded = false;
         let animationInitialized = false;
+        let errorCount = 0;
+        const MAX_ERRORS = 20; // Nếu quá 20 ảnh lỗi thì báo error
+
+        // Timeout 5s - nếu quá 5s vẫn chưa load xong thì force skip
+        loadTimeoutRef.current = setTimeout(() => {
+            if (!imagesLoaded) {
+                console.warn("Loading timeout - skipping animation");
+                setLoadError(true);
+                setImagesLoaded(true);
+            }
+        }, 5000);
 
         for (let i = 1; i <= frameCount; i++) {
             const img = new Image();
@@ -117,6 +130,12 @@ export default function HeroScrollAnimation() {
             const progress = Math.round((loadedCount / frameCount) * 100);
             setLoadProgress(progress);
             setImagesLoaded(true);
+
+            // Clear timeout khi load thành công
+            if (loadTimeoutRef.current) {
+                clearTimeout(loadTimeoutRef.current);
+            }
+
             render();
 
             // Chỉ init animation một lần duy nhất
@@ -131,6 +150,11 @@ export default function HeroScrollAnimation() {
 
         images[0].onerror = (e) => {
             console.error("Failed to load first image:", e);
+            setLoadError(true);
+            setImagesLoaded(true); // Force hide loading screen
+            if (loadTimeoutRef.current) {
+                clearTimeout(loadTimeoutRef.current);
+            }
         };
 
         images[0].src = currentFrame(1);
@@ -144,9 +168,28 @@ export default function HeroScrollAnimation() {
                         (loadedCount / frameCount) * 100,
                     );
                     setLoadProgress(progress);
+
+                    // Nếu load đủ 80% thì cũng cho phép dùng
+                    if (
+                        loadedCount >= frameCount * 0.8 &&
+                        loadTimeoutRef.current
+                    ) {
+                        clearTimeout(loadTimeoutRef.current);
+                    }
                 };
                 img.onerror = (e) => {
+                    errorCount++;
                     console.error(`Failed to load image ${i + 1}:`, e);
+
+                    // Nếu quá nhiều lỗi, force skip
+                    if (errorCount > MAX_ERRORS) {
+                        console.error("Too many image load errors - skipping");
+                        setLoadError(true);
+                        setImagesLoaded(true);
+                        if (loadTimeoutRef.current) {
+                            clearTimeout(loadTimeoutRef.current);
+                        }
+                    }
                 };
                 img.src = currentFrame(i + 1);
             }
@@ -230,6 +273,9 @@ export default function HeroScrollAnimation() {
         return () => {
             window.removeEventListener("resize", handleResize);
             ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+            if (loadTimeoutRef.current) {
+                clearTimeout(loadTimeoutRef.current);
+            }
         };
     }, []);
 
@@ -276,17 +322,23 @@ export default function HeroScrollAnimation() {
                         {/* Text */}
                         <div className='text-center'>
                             <p className='text-lg font-semibold text-white drop-shadow-lg mb-1'>
-                                Loading ...
+                                {loadError ? "Loading Failed" : "Loading ..."}
                             </p>
-                            {loadProgress > 0 && (
+                            {!loadError && loadProgress > 0 && (
                                 <p className='text-sm text-white/80 dark:text-gray-300'>
                                     {loadProgress}% complete
+                                </p>
+                            )}
+                            {loadError && (
+                                <p className='text-xs text-red-300 mt-2 max-w-xs'>
+                                    Animation could not be loaded. The page will
+                                    continue without it.
                                 </p>
                             )}
                         </div>
 
                         {/* Progress bar */}
-                        {loadProgress > 0 && (
+                        {!loadError && loadProgress > 0 && (
                             <div className='w-64 h-2 bg-white/20 dark:bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm'>
                                 <div
                                     className='h-full bg-gradient-to-r from-white to-gray-200 dark:from-gray-300 dark:to-gray-400 transition-all duration-300 ease-out shadow-lg'
