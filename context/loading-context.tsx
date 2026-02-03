@@ -29,7 +29,10 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
                 setLoadError,
             }}
         >
-            {children}
+            {/* Hide all content when loading */}
+            <div style={{ visibility: isReady ? 'visible' : 'hidden' }}>
+                {children}
+            </div>
 
             {/* GLOBAL LOADING SCREEN */}
             {!isReady && (
