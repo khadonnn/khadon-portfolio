@@ -87,11 +87,14 @@ export default function HeroScrollAnimation() {
                     Math.floor(animationState.frame),
                     frameCount - 1,
                 );
-                
+
                 // Fallback: Nếu ảnh chưa load, tìm ảnh gần nhất đã load
                 let img = images[frameIndex];
                 let attempts = 0;
-                while ((!img || !img.complete || img.naturalWidth === 0) && attempts < 10) {
+                while (
+                    (!img || !img.complete || img.naturalWidth === 0) &&
+                    attempts < 10
+                ) {
                     frameIndex = Math.max(0, frameIndex - 1);
                     img = images[frameIndex];
                     attempts++;
@@ -172,7 +175,7 @@ export default function HeroScrollAnimation() {
                 });
                 lastProgressUpdate = progress;
             }
-            
+
             // Chỉ cho phép scroll khi load đủ 30% ảnh
             if (loadedCount >= frameCount * 0.3 && !imagesLoaded) {
                 setImagesLoaded(true);
@@ -211,7 +214,11 @@ export default function HeroScrollAnimation() {
         images[0].src = currentFrame(1);
 
         // Batch Loading - Ưu tiên load critical frames trước
-        const loadImageBatch = async (startIndex: number, endIndex: number, priority = false) => {
+        const loadImageBatch = async (
+            startIndex: number,
+            endIndex: number,
+            priority = false,
+        ) => {
             const promises = [];
 
             for (let i = startIndex; i < endIndex && i < frameCount; i++) {
@@ -219,7 +226,7 @@ export default function HeroScrollAnimation() {
                 const promise = new Promise<void>((resolve) => {
                     // KHÔNG dùng loading="lazy" - load ngay
                     img.decoding = "async"; // Async decode để không block main thread
-                    
+
                     img.onload = () => {
                         loadedCount++;
                         updateProgress();
@@ -253,7 +260,7 @@ export default function HeroScrollAnimation() {
             }
 
             await Promise.all(promises);
-            
+
             // Delay giữa batch thường, không delay cho critical batch
             if (!priority) {
                 await new Promise((resolve) => setTimeout(resolve, 50));
@@ -264,11 +271,11 @@ export default function HeroScrollAnimation() {
         const loadAllImages = async () => {
             // Phase 1: Load critical frames (30 ảnh đầu) - KHÔNG delay
             const criticalFrames = Math.min(30, frameCount);
-            console.log('Loading critical frames...');
+            console.log("Loading critical frames...");
             await loadImageBatch(1, criticalFrames, true);
-            
+
             // Phase 2: Load phần còn lại theo batch
-            console.log('Loading remaining frames...');
+            console.log("Loading remaining frames...");
             for (let i = criticalFrames; i < frameCount; i += BATCH_SIZE) {
                 await loadImageBatch(i, i + BATCH_SIZE, false);
             }
@@ -316,8 +323,8 @@ export default function HeroScrollAnimation() {
                 });
 
                 // 1. Hiện Canvas - Dùng opacity (không trigger layout)
-                tl.to(canvas, { 
-                    opacity: 1, 
+                tl.to(canvas, {
+                    opacity: 1,
                     duration: 0.5,
                     ease: "power2.out",
                 });
@@ -326,9 +333,9 @@ export default function HeroScrollAnimation() {
                 tl.fromTo(
                     textElement,
                     { opacity: 0, y: 50 },
-                    { 
-                        opacity: 1, 
-                        y: 0, 
+                    {
+                        opacity: 1,
+                        y: 0,
                         duration: 1,
                         ease: "power2.out",
                     },
@@ -338,9 +345,9 @@ export default function HeroScrollAnimation() {
                 // 3. Chữ "Welcome" biến mất
                 tl.to(
                     textElement,
-                    { 
-                        opacity: 0, 
-                        y: -50, 
+                    {
+                        opacity: 0,
+                        y: -50,
                         duration: 1,
                         ease: "power2.in",
                     },
@@ -371,16 +378,16 @@ export default function HeroScrollAnimation() {
             setCanvasSize();
             render();
         };
-        
+
         window.addEventListener("resize", handleResize);
-        
+
         return () => {
             window.removeEventListener("resize", handleResize);
-            
+
             // Kill specific ScrollTrigger thay vì getAll()
             const trigger = ScrollTrigger.getById("hero-scroll-animation");
             if (trigger) trigger.kill();
-            
+
             if (loadTimeoutRef.current) {
                 clearTimeout(loadTimeoutRef.current);
             }
@@ -398,7 +405,7 @@ export default function HeroScrollAnimation() {
                 <canvas
                     ref={canvasRef}
                     className='opacity-0 w-full h-full object-cover'
-                    style={{ 
+                    style={{
                         pointerEvents: "none",
                         willChange: "opacity, transform",
                         transform: "translateZ(0)", // Force GPU acceleration
@@ -410,7 +417,7 @@ export default function HeroScrollAnimation() {
             <div
                 ref={textRef}
                 className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10 w-full px-4'
-                style={{ 
+                style={{
                     opacity: 0,
                     willChange: "opacity, transform",
                     transform: "translate(-50%, -50%) translateZ(0)",
