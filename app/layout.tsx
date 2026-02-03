@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 import ActiveSectionContextProvider from "@/context/active-section-context";
 import ThemeContextProvider from "@/context/theme-context";
+import { LoadingProvider } from "@/context/loading-context";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/footer";
 import ThemeSwitch from "@/components/theme-switch";
@@ -26,13 +27,15 @@ export default function RootLayout({
                 <div className='bg-[#ffced0] absolute top-[-6rem] -z-10 right-[11rem] h-[31.25rem] w-[40.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#ff8a8e]'></div>
                 <div className='bg-[#e8bdf8] absolute top-[-1rem] -z-10 left-[-35rem] h-[31.25rem] w-[31rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#dc93f6]'></div>
                 <ThemeContextProvider>
-                    <ActiveSectionContextProvider>
-                        <Header />
-                        {children}
-                        <Footer />
-                        <Toaster position='top-right' />
-                        <ThemeSwitch />
-                    </ActiveSectionContextProvider>
+                    <LoadingProvider>
+                        <ActiveSectionContextProvider>
+                            <Header />
+                            {children}
+                            <Footer />
+                            <Toaster position='top-right' />
+                            <ThemeSwitch />
+                        </ActiveSectionContextProvider>
+                    </LoadingProvider>
                 </ThemeContextProvider>
             </body>
         </html>

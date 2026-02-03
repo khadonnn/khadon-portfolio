@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLoading } from "@/context/loading-context";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,8 +11,13 @@ export default function HeroScrollAnimation() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
-    const [loadError, setLoadError] = useState(false);
+
+    // Use global loading context
+    const { setIsReady, setLoadProgress, setLoadError } = useLoading();
+
+    // Refs
     const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const minLoadTimeRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -44,38 +50,45 @@ export default function HeroScrollAnimation() {
         };
         setCanvasSize();
 
-        // --- PRELOAD ẢNH (BATCH LOADING) ---
+        // --- LOGIC LOADING ---
         const images: HTMLImageElement[] = [];
         const animationState = { frame: 0 };
-        let loadedCount = 0;
-        let firstImageLoaded = false;
-        let animationInitialized = false;
-        let errorCount = 0;
-        let lastProgressUpdate = 0;
-        const MAX_ERRORS = 30;
-        const BATCH_SIZE = 15; // Tải 15 ảnh mỗi lần
 
-        // Timeout 20s - nếu quá lâu thì bỏ qua animation
-        loadTimeoutRef.current = setTimeout(() => {
-            if (loadedCount < frameCount * 0.5) {
-                console.warn("Loading timeout - continuing anyway");
-                setLoadError(true);
+        let loadedCount = 0;
+        let lastProgressUpdate = 0;
+
+        // Config Loading
+        const BATCH_SIZE = 15;
+        const MIN_LOAD_TIME = 800; // 0.8s để user thấy progress animation
+        const REQUIRED_PROGRESS = 0.5;
+
+        let imagesReadyToShow = false;
+        let minLoadTimePassed = false;
+
+        // --- CHECK ĐIỀU KIỆN ---
+        const checkAndShowAnimation = () => {
+            if (imagesReadyToShow && minLoadTimePassed) {
+                console.log("🚀 Showing animation with BLUR effect.");
+                setIsReady(true);
             }
+        };
+
+        // --- TIMERS ---
+        minLoadTimeRef.current = setTimeout(() => {
+            minLoadTimePassed = true;
+            checkAndShowAnimation();
+        }, MIN_LOAD_TIME);
+
+        loadTimeoutRef.current = setTimeout(() => {
+            setLoadError(true);
+            setIsReady(true);
         }, 20000);
 
-        // Khởi tạo mảng ảnh
-        for (let i = 1; i <= frameCount; i++) {
-            const img = new Image();
-            images.push(img);
-        }
-
-        // Optimized render với requestAnimationFrame và fallback
+        // --- RENDER ---
         let renderScheduled = false;
         const render = () => {
-            // Debounce render calls
             if (renderScheduled) return;
             renderScheduled = true;
-
             requestAnimationFrame(() => {
                 renderScheduled = false;
 
@@ -83,8 +96,6 @@ export default function HeroScrollAnimation() {
                     Math.floor(animationState.frame),
                     frameCount - 1,
                 );
-
-                // Fallback: Nếu ảnh chưa load, tìm ảnh gần nhất đã load
                 let img = images[frameIndex];
                 let attempts = 0;
                 while (
@@ -96,21 +107,12 @@ export default function HeroScrollAnimation() {
                     attempts++;
                 }
 
-                if (
-                    !context ||
-                    !canvas ||
-                    !img ||
-                    !img.complete ||
-                    img.naturalWidth === 0
-                )
-                    return;
+                if (!img || !img.complete || img.naturalWidth === 0) return;
 
                 const displayWidth = window.innerWidth;
                 const displayHeight = window.innerHeight;
-
                 context.clearRect(0, 0, displayWidth, displayHeight);
 
-                // Vẽ ảnh Cover
                 const scale = Math.max(
                     displayWidth / img.width,
                     displayHeight / img.height,
@@ -120,22 +122,15 @@ export default function HeroScrollAnimation() {
 
                 context.imageSmoothingEnabled = true;
                 context.imageSmoothingQuality = "high";
+                context.drawImage(
+                    img,
+                    x,
+                    y,
+                    img.width * scale,
+                    img.height * scale,
+                );
 
-                // Sử dụng drawImage với optimization
-                try {
-                    context.drawImage(
-                        img,
-                        x,
-                        y,
-                        img.width * scale,
-                        img.height * scale,
-                    );
-                } catch (e) {
-                    console.error("Canvas render error:", e);
-                    return;
-                }
-
-                // Vẽ Watermark (Gradient che góc)
+                // Watermark Gradient
                 const radius = Math.max(
                     displayWidth * 0.3,
                     displayHeight * 0.3,
@@ -160,252 +155,183 @@ export default function HeroScrollAnimation() {
             });
         };
 
-        // Load ảnh đầu tiên (Critical)
-        images[0].onload = () => {
-            firstImageLoaded = true;
-            loadedCount++;
-            console.log("First frame loaded");
-
-            render();
-
-            // Init animation ngay sau ảnh đầu
-            if (!animationInitialized) {
-                animationInitialized = true;
-                requestAnimationFrame(() => {
-                    initAnimation();
-                });
-            }
-        };
-
-        images[0].onerror = (e) => {
-            console.error("Failed to load first image:", e);
-            setLoadError(true);
-            if (loadTimeoutRef.current) {
-                clearTimeout(loadTimeoutRef.current);
-            }
-        };
-
-        images[0].src = currentFrame(1);
-
-        // Batch Loading - Ưu tiên load critical frames trước
-        const loadImageBatch = async (
-            startIndex: number,
-            endIndex: number,
-            priority = false,
-        ) => {
+        // --- BATCH LOADING ---
+        const loadImageBatch = async (start: number, end: number) => {
             const promises = [];
-
-            for (let i = startIndex; i < endIndex && i < frameCount; i++) {
+            for (let i = start; i < end && i < frameCount; i++) {
                 const img = images[i];
-                const promise = new Promise<void>((resolve) => {
-                    // KHÔNG dùng loading="lazy" - load ngay
-                    img.decoding = "async"; // Async decode để không block main thread
+                if (!img) continue;
 
+                const p = new Promise<void>((resolve) => {
                     img.onload = () => {
                         loadedCount++;
+                        const progress = Math.round(
+                            (loadedCount / frameCount) * 100,
+                        );
 
-                        // Log progress nhẹ (mỗi 20%)
-                        if (loadedCount % Math.floor(frameCount / 5) === 0) {
+                        // Throttle update với RAF để user thấy được animation
+                        requestAnimationFrame(() => {
                             console.log(
-                                `Loaded ${loadedCount}/${frameCount} frames`,
+                                `Progress: ${progress}% (${loadedCount}/${frameCount})`,
                             );
-                        }
+                            setLoadProgress(progress);
+                            lastProgressUpdate = progress;
+                        });
 
-                        // Clear timeout khi load đủ 50%
                         if (
-                            loadedCount >= frameCount * 0.5 &&
-                            loadTimeoutRef.current
+                            !imagesReadyToShow &&
+                            loadedCount >= frameCount * REQUIRED_PROGRESS
                         ) {
-                            clearTimeout(loadTimeoutRef.current);
+                            imagesReadyToShow = true;
+                            checkAndShowAnimation();
                         }
                         resolve();
                     };
-                    img.onerror = (e) => {
-                        errorCount++;
-                        console.error(`Failed to load image ${i + 1}:`, e);
-
-                        if (errorCount > MAX_ERRORS) {
-                            console.error("Too many errors - skipping");
-                            setLoadError(true);
-                            if (loadTimeoutRef.current) {
-                                clearTimeout(loadTimeoutRef.current);
-                            }
-                        }
+                    img.onerror = () => {
+                        loadedCount++;
                         resolve();
                     };
                     img.src = currentFrame(i + 1);
                 });
-                promises.push(promise);
+                promises.push(p);
             }
-
             await Promise.all(promises);
+            await new Promise((r) => setTimeout(r, 20));
+        };
 
-            // Delay giữa batch thường, không delay cho critical batch
-            if (!priority) {
-                await new Promise((resolve) => setTimeout(resolve, 20));
+        // --- KHỞI CHẠY ---
+        for (let i = 0; i < frameCount; i++) {
+            images.push(new Image());
+        }
+
+        const firstImg = images[0];
+        firstImg.onload = () => {
+            loadedCount++;
+            lastProgressUpdate = 1;
+            requestAnimationFrame(() => {
+                console.log("First image loaded, progress: 1%");
+                setLoadProgress(1);
+            });
+            render();
+            initAnimation();
+            loadRest();
+        };
+        firstImg.src = currentFrame(1);
+
+        const loadRest = async () => {
+            await loadImageBatch(1, 15);
+            for (let i = 15; i < frameCount; i += BATCH_SIZE) {
+                await loadImageBatch(i, i + BATCH_SIZE);
             }
         };
 
-        // Load images theo chiến lược: Critical frames trước, sau đó mới batch loading
-        const loadAllImages = async () => {
-            // Phase 1: Load critical frames (15 ảnh đầu) - KHÔNG delay
-            const criticalFrames = Math.min(15, frameCount);
-            console.log("Loading critical frames...");
-            await loadImageBatch(1, criticalFrames, true);
-
-            // Phase 2: Load phần còn lại theo batch
-            console.log("Loading remaining frames...");
-            for (let i = criticalFrames; i < frameCount; i += BATCH_SIZE) {
-                await loadImageBatch(i, i + BATCH_SIZE, false);
-            }
-
-            // Hoàn tất
-            console.log(`All ${frameCount} frames loaded successfully`);
-        };
-
-        // Bắt đầu load sau 100ms
-        setTimeout(() => {
-            loadAllImages();
-        }, 100);
-
-        // --- ANIMATION CHÍNH (GỘP CẢ ẢNH VÀ CHỮ) ---
+        // --- GSAP ANIMATION (WITH BLUR) ---
         function initAnimation() {
-            if (!firstImageLoaded || !canvas || !textElement || !container) {
-                console.warn("Animation init skipped - components not ready");
-                return;
-            }
+            ScrollTrigger.getAll().forEach(
+                (t) => t.trigger === container && t.kill(),
+            );
 
-            try {
-                // Kiểm tra xem đã có ScrollTrigger nào chạy chưa
-                const existingTriggers = ScrollTrigger.getAll();
-                const hasSameTrigger = existingTriggers.some(
-                    (t) => t.trigger === container,
-                );
-                if (hasSameTrigger) {
-                    console.warn("Animation already initialized");
-                    return;
-                }
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    id: "hero-scroll-animation",
+                    trigger: container,
+                    start: "top top",
+                    end: "+=2000",
+                    scrub: 0.3,
+                    pin: true,
+                    invalidateOnRefresh: true,
+                    fastScrollEnd: true,
+                },
+            });
 
-                // Timeline chính - Tối ưu performance
-                const tl = gsap.timeline({
-                    scrollTrigger: {
-                        id: "hero-scroll-animation",
-                        trigger: container,
-                        start: "top top",
-                        end: "+=2000", // Giảm xuống 2000px để scroll ngắn hơn với 120 frames
-                        scrub: 0.3, // Giảm scrub để responsive hơn
-                        pin: true,
-                        anticipatePin: 1,
-                        invalidateOnRefresh: true,
-                        fastScrollEnd: true,
-                    },
-                });
+            // 1. Enter: Fade In + UNBLUR (Từ mờ -> Rõ)
+            tl.to(canvas, {
+                opacity: 1,
+                filter: "blur(0px)", // Xóa mờ
+                duration: 1,
+                ease: "power2.out",
+            });
 
-                // 1. Hiện Canvas - Dùng opacity (không trigger layout)
-                tl.to(canvas, {
-                    opacity: 1,
-                    duration: 0.5,
-                    ease: "power2.out",
-                });
+            // 2. Text Animation
+            tl.fromTo(
+                textElement,
+                { opacity: 0, y: 50 },
+                { opacity: 1, y: 0, duration: 1 },
+                "<",
+            );
 
-                // 2. Chữ "Welcome" xuất hiện - Dùng y thay vì top
-                tl.fromTo(
-                    textElement,
-                    { opacity: 0, y: 50 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 1,
-                        ease: "power2.out",
-                    },
-                    "<",
-                );
+            tl.to(textElement, { opacity: 0, y: -50, duration: 1 }, ">");
 
-                // 3. Chữ "Welcome" biến mất
-                tl.to(
-                    textElement,
-                    {
-                        opacity: 0,
-                        y: -50,
-                        duration: 1,
-                        ease: "power2.in",
-                    },
-                    ">",
-                );
+            // 3. Image Sequence
+            tl.to(
+                animationState,
+                {
+                    frame: frameCount - 1,
+                    snap: "frame",
+                    ease: "none",
+                    duration: 10,
+                    onUpdate: render,
+                },
+                0,
+            );
 
-                // 4. Chạy Frame ảnh (Chạy suốt quá trình)
-                tl.to(
-                    animationState,
-                    {
-                        frame: frameCount - 1,
-                        snap: "frame",
-                        ease: "none",
-                        duration: 10, // Kéo dài để chiếm phần lớn thời gian scroll
-                        onUpdate: render,
-                    },
-                    0,
-                ); // Bắt đầu từ thời điểm 0 của timeline
-
-                // 5. Fade out Canvas ở cuối
-                tl.to(canvas, { opacity: 0, duration: 1 }, "-=1");
-            } catch (error) {
-                console.error("Animation init error:", error);
-            }
+            // 4. Exit: Fade Out + BLUR (Từ rõ -> Mờ)
+            tl.to(
+                canvas,
+                {
+                    opacity: 0,
+                    filter: "blur(10px)", // Mờ lại khi biến mất
+                    duration: 1.5,
+                    ease: "power2.in",
+                },
+                "-=1.5",
+            );
         }
 
         const handleResize = () => {
             setCanvasSize();
             render();
         };
-
         window.addEventListener("resize", handleResize);
 
         return () => {
             window.removeEventListener("resize", handleResize);
-
-            // Kill specific ScrollTrigger thay vì getAll()
-            const trigger = ScrollTrigger.getById("hero-scroll-animation");
-            if (trigger) trigger.kill();
-
-            if (loadTimeoutRef.current) {
-                clearTimeout(loadTimeoutRef.current);
-            }
+            ScrollTrigger.getAll().forEach((t) => t.kill());
+            if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+            if (minLoadTimeRef.current) clearTimeout(minLoadTimeRef.current);
         };
     }, []);
 
     return (
         <section
             ref={containerRef}
-            className='relative w-full overflow-hidden'
+            className='relative w-full overflow-hidden my-20'
             style={{ height: "100vh" }}
         >
-            {/* Lớp Canvas nền */}
             <div className='absolute inset-0 w-full h-full'>
                 <canvas
                     ref={canvasRef}
                     className='opacity-0 w-full h-full object-cover'
                     style={{
                         pointerEvents: "none",
-                        willChange: "opacity, transform",
-                        transform: "translateZ(0)", // Force GPU acceleration
+                        filter: "blur(10px)", // Khởi tạo mờ
+                        willChange: "opacity, transform, filter", // Tối ưu GPU
+                        transform: "translateZ(0)",
                     }}
                 />
             </div>
 
-            {/* Lớp Chữ Welcome (Nằm đè lên trên Canvas) */}
             <div
                 ref={textRef}
                 className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10 w-full px-4'
-                style={{
-                    opacity: 0,
-                    willChange: "opacity, transform",
-                    transform: "translate(-50%, -50%) translateZ(0)",
-                }}
+                style={{ opacity: 0 }}
             >
-                <h2 className='text-4xl md:text-4xl font-bold text-white drop-shadow-lg mb-2 bg-black/30 inline-block px-4 py-2 rounded-lg'>
-                    Scroll to experience the magic
+                <h2 className='text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-2'>
+                    Scroll to experience
                 </h2>
             </div>
+
+            {/* LOADING SCREEN */}
         </section>
     );
 }
