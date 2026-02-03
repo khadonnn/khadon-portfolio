@@ -46,102 +46,132 @@ export default function HeroScrollAnimation() {
         };
         setCanvasSize();
 
-        // --- PRELOAD ẢNH ---
+        // --- PRELOAD ẢNH (BATCH LOADING) ---
         const images: HTMLImageElement[] = [];
         const animationState = { frame: 0 };
         let loadedCount = 0;
         let firstImageLoaded = false;
         let animationInitialized = false;
         let errorCount = 0;
-        const MAX_ERRORS = 20; // Nếu quá 20 ảnh lỗi thì báo error
+        let lastProgressUpdate = 0;
+        const MAX_ERRORS = 30;
+        const BATCH_SIZE = 10; // Tải 10 ảnh mỗi lần
+        const PROGRESS_UPDATE_THRESHOLD = 5; // Chỉ update UI khi tăng >= 5%
 
-        // Timeout 5s - nếu quá 5s vẫn chưa load xong thì force skip
+        // Timeout 15s cho môi trường mạng chậm
         loadTimeoutRef.current = setTimeout(() => {
-            if (!imagesLoaded) {
+            if (!imagesLoaded && loadedCount < frameCount * 0.3) {
                 console.warn("Loading timeout - skipping animation");
                 setLoadError(true);
                 setImagesLoaded(true);
             }
-        }, 5000);
+        }, 15000);
 
+        // Khởi tạo mảng ảnh
         for (let i = 1; i <= frameCount; i++) {
             const img = new Image();
             images.push(img);
         }
 
+        // Optimized render với requestAnimationFrame
+        let renderScheduled = false;
         const render = () => {
-            const frameIndex = Math.min(
-                Math.floor(animationState.frame),
-                frameCount - 1,
-            );
-            const img = images[frameIndex];
+            // Debounce render calls
+            if (renderScheduled) return;
+            renderScheduled = true;
 
-            if (
-                !context ||
-                !canvas ||
-                !img ||
-                !img.complete ||
-                img.naturalWidth === 0
-            )
-                return;
+            requestAnimationFrame(() => {
+                renderScheduled = false;
 
-            const displayWidth = window.innerWidth;
-            const displayHeight = window.innerHeight;
+                const frameIndex = Math.min(
+                    Math.floor(animationState.frame),
+                    frameCount - 1,
+                );
+                const img = images[frameIndex];
 
-            context.clearRect(0, 0, displayWidth, displayHeight);
+                if (
+                    !context ||
+                    !canvas ||
+                    !img ||
+                    !img.complete ||
+                    img.naturalWidth === 0
+                )
+                    return;
 
-            // Vẽ ảnh Cover
-            const scale = Math.max(
-                displayWidth / img.width,
-                displayHeight / img.height,
-            );
-            const x = displayWidth / 2 - (img.width / 2) * scale;
-            const y = displayHeight / 2 - (img.height / 2) * scale;
+                const displayWidth = window.innerWidth;
+                const displayHeight = window.innerHeight;
 
-            context.imageSmoothingEnabled = true;
-            context.imageSmoothingQuality = "high";
-            context.drawImage(img, x, y, img.width * scale, img.height * scale);
+                context.clearRect(0, 0, displayWidth, displayHeight);
 
-            // Vẽ Watermark (Gradient che góc)
-            const radius = Math.max(displayWidth * 0.3, displayHeight * 0.3);
-            const gradient = context.createRadialGradient(
-                displayWidth,
-                displayHeight,
-                0,
-                displayWidth,
-                displayHeight,
-                radius,
-            );
-            gradient.addColorStop(0, `rgba(249, 250, 251, 0.9)`);
-            gradient.addColorStop(1, `rgba(249, 250, 251, 0)`);
-            context.fillStyle = gradient;
-            context.fillRect(
-                displayWidth - radius,
-                displayHeight - radius,
-                radius,
-                radius,
-            );
+                // Vẽ ảnh Cover
+                const scale = Math.max(
+                    displayWidth / img.width,
+                    displayHeight / img.height,
+                );
+                const x = displayWidth / 2 - (img.width / 2) * scale;
+                const y = displayHeight / 2 - (img.height / 2) * scale;
+
+                context.imageSmoothingEnabled = true;
+                context.imageSmoothingQuality = "high";
+                
+                // Sử dụng drawImage với optimization
+                try {
+                    context.drawImage(img, x, y, img.width * scale, img.height * scale);
+                } catch (e) {
+                    console.error("Canvas render error:", e);
+                }
+
+                // Vẽ Watermark (Gradient che góc)
+                const radius = Math.max(displayWidth * 0.3, displayHeight * 0.3);
+                const gradient = context.createRadialGradient(
+                    displayWidth,
+                    displayHeight,
+                    0,
+                    displayWidth,
+                    displayHeight,
+                    radius,
+                );
+                gradient.addColorStop(0, `rgba(249, 250, 251, 0.9)`);
+                gradient.addColorStop(1, `rgba(249, 250, 251, 0)`);
+                context.fillStyle = gradient;
+                context.fillRect(
+                    displayWidth - radius,
+                    displayHeight - radius,
+                    radius,
+                    radius,
+                );
+            });
         };
 
-        // Load ảnh đầu tiên
+        // Debounced progress update để tránh re-render liên tục
+        const updateProgress = () => {
+            const progress = Math.round((loadedCount / frameCount) * 100);
+            
+            // Chỉ update khi tăng >= 5% để giảm re-render
+            if (progress - lastProgressUpdate >= PROGRESS_UPDATE_THRESHOLD) {
+                requestAnimationFrame(() => {
+                    setLoadProgress(progress);
+                });
+                lastProgressUpdate = progress;
+            }
+        };
+
+        // Load ảnh đầu tiên (Critical)
         images[0].onload = () => {
             firstImageLoaded = true;
             loadedCount++;
-            const progress = Math.round((loadedCount / frameCount) * 100);
-            setLoadProgress(progress);
+            setLoadProgress(1);
             setImagesLoaded(true);
 
-            // Clear timeout khi load thành công
             if (loadTimeoutRef.current) {
                 clearTimeout(loadTimeoutRef.current);
             }
 
             render();
 
-            // Chỉ init animation một lần duy nhất
+            // Init animation ngay sau ảnh đầu
             if (!animationInitialized) {
                 animationInitialized = true;
-                // Delay để đảm bảo DOM đã ready
                 requestAnimationFrame(() => {
                     initAnimation();
                 });
@@ -151,7 +181,7 @@ export default function HeroScrollAnimation() {
         images[0].onerror = (e) => {
             console.error("Failed to load first image:", e);
             setLoadError(true);
-            setImagesLoaded(true); // Force hide loading screen
+            setImagesLoaded(true);
             if (loadTimeoutRef.current) {
                 clearTimeout(loadTimeoutRef.current);
             }
@@ -159,42 +189,61 @@ export default function HeroScrollAnimation() {
 
         images[0].src = currentFrame(1);
 
-        const loadImages = () => {
-            for (let i = 1; i < frameCount; i++) {
+        // Batch Loading - Tải từng lô để tránh nghẽn mạng
+        const loadImageBatch = async (startIndex: number, endIndex: number) => {
+            const promises = [];
+            
+            for (let i = startIndex; i < endIndex && i < frameCount; i++) {
                 const img = images[i];
-                img.onload = () => {
-                    loadedCount++;
-                    const progress = Math.round(
-                        (loadedCount / frameCount) * 100,
-                    );
-                    setLoadProgress(progress);
-
-                    // Nếu load đủ 80% thì cũng cho phép dùng
-                    if (
-                        loadedCount >= frameCount * 0.8 &&
-                        loadTimeoutRef.current
-                    ) {
-                        clearTimeout(loadTimeoutRef.current);
-                    }
-                };
-                img.onerror = (e) => {
-                    errorCount++;
-                    console.error(`Failed to load image ${i + 1}:`, e);
-
-                    // Nếu quá nhiều lỗi, force skip
-                    if (errorCount > MAX_ERRORS) {
-                        console.error("Too many image load errors - skipping");
-                        setLoadError(true);
-                        setImagesLoaded(true);
-                        if (loadTimeoutRef.current) {
+                const promise = new Promise<void>((resolve) => {
+                    img.onload = () => {
+                        loadedCount++;
+                        updateProgress();
+                        
+                        // Clear timeout khi load đủ 70%
+                        if (loadedCount >= frameCount * 0.7 && loadTimeoutRef.current) {
                             clearTimeout(loadTimeoutRef.current);
                         }
-                    }
-                };
-                img.src = currentFrame(i + 1);
+                        resolve();
+                    };
+                    img.onerror = (e) => {
+                        errorCount++;
+                        console.error(`Failed to load image ${i + 1}:`, e);
+                        
+                        if (errorCount > MAX_ERRORS) {
+                            console.error("Too many errors - skipping");
+                            setLoadError(true);
+                            setImagesLoaded(true);
+                            if (loadTimeoutRef.current) {
+                                clearTimeout(loadTimeoutRef.current);
+                            }
+                        }
+                        resolve();
+                    };
+                    img.src = currentFrame(i + 1);
+                });
+                promises.push(promise);
             }
+            
+            await Promise.all(promises);
         };
-        setTimeout(loadImages, 100);
+
+        // Load images theo batch (tránh nghẽn mạng)
+        const loadAllImages = async () => {
+            for (let i = 1; i < frameCount; i += BATCH_SIZE) {
+                await loadImageBatch(i, i + BATCH_SIZE);
+                // Delay nhỏ giữa các batch để không chặn UI
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            
+            // Update cuối cùng
+            setLoadProgress(100);
+        };
+
+        // Bắt đầu load sau 100ms
+        setTimeout(() => {
+            loadAllImages();
+        }, 100);
 
         // --- ANIMATION CHÍNH (GỘP CẢ ẢNH VÀ CHỮ) ---
         function initAnimation() {
