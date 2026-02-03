@@ -33,7 +33,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
 
             {/* GLOBAL LOADING SCREEN */}
             {!isReady && (
-                <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-opacity duration-700'>
+                <div className='fixed inset-0 z-[99999] flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-opacity duration-700'>
                     <div className='flex flex-col items-center gap-6 p-8'>
                         <div className='relative w-20 h-20'>
                             <div className='absolute inset-0 rounded-full border-4 border-gray-200 dark:border-gray-700'></div>
