@@ -16,7 +16,7 @@ export default function Contact() {
         <motion.section
             id='contact'
             ref={ref}
-            className='-mx-4 mb-20 sm:mb-28 w-full text-center relative overflow-hidden flex justify-center items-center min-h-[40rem] '
+            className='px-4 sm:px-6 mb-20 sm:mb-28 w-full text-center relative overflow-hidden flex justify-center items-center min-h-[35rem] sm:min-h-[40rem]'
             initial={{
                 opacity: 0,
             }}
@@ -39,19 +39,22 @@ export default function Contact() {
             <div className='bg-[#d6aae4] absolute bottom-[8rem] -z-10 left-[-35rem] h-[10.25rem] w-[10rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#794aabb1]'></div>
 
             {/* Nội dung form căn giữa trong container nhỏ */}
-            <div className='w-[min(100%,38rem)] mx-auto z-10'>
+            <div className='w-full max-w-[38rem] mx-auto z-10'>
                 <SectionHeading>Contact me</SectionHeading>
 
-                <p className='text-gray-700 -mt-6 dark:text-white/80'>
+                <p className='text-gray-700 -mt-6 px-2 text-sm sm:text-base dark:text-white/80'>
                     Please contact me directly at{" "}
-                    <a className='underline' href='mailto:example@gmail.com'>
+                    <a
+                        className='underline break-all sm:break-normal'
+                        href='mailto:example@gmail.com'
+                    >
                         nguyendinhdongkha@gmail.com
                     </a>{" "}
                     or through this form.
                 </p>
 
                 <form
-                    className='mt-10 flex flex-col dark:text-black'
+                    className='mt-6 sm:mt-10 flex flex-col dark:text-black'
                     action={async (formData) => {
                         const { data, error } = await sendEmail(formData);
 
@@ -66,7 +69,7 @@ export default function Contact() {
                     }}
                 >
                     <input
-                        className='h-14 shadow-sm px-4 rounded-lg borderBlack dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none'
+                        className='h-12 sm:h-14 text-sm sm:text-base shadow-sm px-3 sm:px-4 rounded-lg borderBlack dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none'
                         name='senderEmail'
                         type='email'
                         required
@@ -74,7 +77,7 @@ export default function Contact() {
                         placeholder='Your email @gmail.com'
                     />
                     <textarea
-                        className='h-52 shadow-md my-3 rounded-lg borderBlack p-4 dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none'
+                        className='h-40 sm:h-52 text-sm sm:text-base shadow-md my-3 rounded-lg borderBlack p-3 sm:p-4 dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none resize-none'
                         name='message'
                         placeholder='Your message'
                         required

@@ -1,5 +1,5 @@
 "use client";
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -10,6 +10,18 @@ if (typeof window !== "undefined") {
 const SVGbg = () => {
     const pathRef = useRef<SVGPathElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [strokeWidth, setStrokeWidth] = useState(10);
+
+    useEffect(() => {
+        const updateStrokeWidth = () => {
+            setStrokeWidth(window.innerWidth < 640 ? 5 : 10);
+        };
+
+        updateStrokeWidth();
+        window.addEventListener("resize", updateStrokeWidth);
+
+        return () => window.removeEventListener("resize", updateStrokeWidth);
+    }, []);
 
     useLayoutEffect(() => {
         const path = pathRef.current;
@@ -123,7 +135,7 @@ const SVGbg = () => {
                     className='svg-path'
                     d='M652.549 0.455826C652.549 0.455826 -53.4957 305.157 3.80881 643.883C76.8007 1075.34 875.041 710.393 1183.1 1042.46C1539.24 1426.35 482.599 1157.96 205.599 1265.96C-71.4007 1373.96 66.5993 1635.46 205.599 1742.96C462.494 1941.63 1195.63 2054.92 1323.26 2357.03C1515.9 2813.04 -252.401 2474.46 120.599 2789.96C310.802 2950.84 611.497 3000.46 611.497 3000.46'
                     stroke='#909090'
-                    strokeWidth={10} // Có thể giảm xuống 3-5 nếu nét bị to quá khi kéo giãn
+                    strokeWidth={strokeWidth}
                     vectorEffect='non-scaling-stroke' // Giữ độ dày nét vẽ không bị méo khi SVG bị kéo giãn
                 />
             </svg>
