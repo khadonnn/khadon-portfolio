@@ -1,38 +1,50 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import { certificates } from "@/lib/data";
+import { BsArrowLeft } from "react-icons/bs";
 
-export default function CertificateDetail({
-    params,
-}: {
+interface PageProps {
     params: { slug: string };
-}) {
-    const router = useRouter();
-    const certificate = certificates.find((cert) => cert.slug === params.slug);
+}
+
+export default function CertificateDetail({ params }: PageProps) {
+    const certificate = certificates.find((c) => c.slug === params.slug);
 
     if (!certificate) {
-        return <p className='text-white text-lg'>Certificate not found</p>;
+        notFound();
     }
 
     return (
-        <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-lg z-[999]'>
-            <div className='relative w-full h-full max-w-4xl mx-auto p-6'>
-                <button
-                    className='absolute top-3 right-3 bg-white p-2 rounded-full shadow-lg text-black text-lg hover:bg-gray-200'
-                    onClick={() => router.push("/")}
+        <div className='min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6 transition-colors'>
+            <div className='relative w-full max-w-5xl'>
+                <a
+                    href='/'
+                    className='absolute top-0 left-0 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg text-gray-900 dark:text-white text-lg hover:bg-gray-100 dark:hover:bg-gray-700 z-10 flex items-center gap-2 transition-colors'
                 >
-                    ❌
-                </button>
-                <Image
-                    src={certificate.imageSrc}
-                    height={1000}
-                    width={1000}
-                    className='max-w-full max-h-[85vh] rounded-lg shadow-lg object-contain'
-                    alt={certificate.title}
-                />
+                    <BsArrowLeft />
+                    <span className='text-sm font-medium'>Back</span>
+                </a>
+                <div className='mt-12'>
+                    <h1 className='text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center'>
+                        {certificate.title}
+                    </h1>
+                    <p className='text-gray-600 dark:text-gray-400 mb-6 text-center'>
+                        {certificate.description}
+                    </p>
+                    {/* Dùng img tag thay vì Next Image để tránh optimization issue */}
+                    <img
+                        src={certificate.imageSrc}
+                        className='w-full rounded-lg shadow-2xl object-contain'
+                        alt={certificate.title}
+                    />
+                </div>
             </div>
         </div>
     );
+}
+
+export function generateStaticParams() {
+    return certificates.map((cert) => ({
+        slug: cert.slug,
+    }));
 }

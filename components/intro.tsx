@@ -1,18 +1,44 @@
 "use client";
+
 import Image from "next/image";
 import React from "react";
 import { motion } from "framer-motion";
 import { BsArrowRight, BsLinkedin } from "react-icons/bs";
 import { HiDownload } from "react-icons/hi";
 import { FaGithubSquare } from "react-icons/fa";
-import Link from "next/link";
+// import Link from "next/link"; // Không cần dùng Link nữa vì ta dùng Button scroll
 import { useSectionInView } from "@/lib/hooks";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import { FlipWords } from "./ui/flip-words";
+import ButtonGsap from "./ui/buttonGsap"; // Đảm bảo đường dẫn đúng
+
 const Intro = () => {
     const { ref } = useSectionInView("Home");
     const { setActiveSection, setTimeOfLastClick } = useActiveSectionContext();
     const words = ["Next.js", "React", "Full-Stack Dev"];
+
+    // Hàm xử lý khi click vào Contact
+    const handleContactClick = () => {
+        setActiveSection("Contact");
+        setTimeOfLastClick(Date.now());
+        // Tìm section contact và scroll tới đó
+        const contactSection = document.querySelector("#contact");
+        if (contactSection) {
+            contactSection.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
+    // Hàm xử lý download CV
+    const handleDownloadClick = () => {
+        // Tạo thẻ a ảo để kích hoạt download
+        const link = document.createElement("a");
+        link.href = "/Khadon_CV.pdf";
+        link.download = "Khadon_CV.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <section
             id='home'
@@ -55,6 +81,7 @@ const Intro = () => {
                     </motion.span>
                 </div>
             </div>
+
             <motion.h2
                 className='mb-10 mt-4 px-4 text-xl font-medium !leading-[1.5] sm:text-3xl '
                 initial={{ opacity: 0, y: 100 }}
@@ -70,47 +97,60 @@ const Intro = () => {
                 </strong>{" "}
                 <br />
             </motion.h2>
+
             <motion.div
-                className='flex flex-col sm:flex-row items-center justify-center gap-2 px-4 text-lg font-medium'
+                className='flex flex-col sm:flex-row items-center justify-center gap-4 px-4 text-lg font-medium'
                 initial={{ opacity: 0, y: 100 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                     delay: 0.1,
                 }}
             >
-                <Link
-                    href='#contact'
-                    className='group bg-gray-900 text-white px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110 hover:bg-gray-950 active:scale-105 transition'
-                    onClick={() => {
-                        setActiveSection("Contact");
-                        setTimeOfLastClick(Date.now());
-                    }}
+                {/* Nút Contact Me */}
+                <ButtonGsap
+                    onClick={handleContactClick}
+                    // Override chỉ light mode, dark mode dùng design gốc (trắng)
+                    className='bg-gray-900 text-white hover:bg-gray-950 border-none group'
                 >
-                    Contact me here{" "}
-                    <BsArrowRight className='opacity-70 group-hover:translate-x-1 transition' />{" "}
-                </Link>
-                <a
-                    href='/Khadon_CV.pdf'
-                    download={true}
-                    className='group bg-white px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10'
+                    <div className='flex items-center gap-2'>
+                        Contact me here{" "}
+                        <BsArrowRight className='opacity-70 group-hover:translate-x-1 transition' />
+                    </div>
+                </ButtonGsap>
+
+                {/* Nút Download CV */}
+                <ButtonGsap
+                    color='secondary'
+                    onClick={handleDownloadClick}
+                    // Override class để nền trắng
+                    className='bg-white dark:bg-white/10 text-gray-700 dark:text-white/90 border-black/10 dark:border-white/10 group'
                 >
-                    Download CV{" "}
-                    <HiDownload className='opacity-60 group-hover:translate-y-1 transition' />
-                </a>
-                <a
-                    className='bg-white p-4 text-gray-700 hover:text-gray-950 flex items-center gap-2 rounded-full focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60'
-                    href='https://www.linkedin.com/in/kha-nguyen1301/'
-                    target='_blank'
-                >
-                    <BsLinkedin />
-                </a>
-                <a
-                    className='bg-white p-4 text-gray-700 flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60'
-                    href='https://github.com/khadonnn'
-                    target='_blank'
-                >
-                    <FaGithubSquare />
-                </a>
+                    <div className='flex items-center gap-2'>
+                        Download CV{" "}
+                        <HiDownload className='opacity-60 group-hover:translate-y-1 transition' />
+                    </div>
+                </ButtonGsap>
+
+                {/* Các nút icon social giữ nguyên thẻ a vì chúng quá nhỏ cho hiệu ứng ripple lớn */}
+                <div className='flex gap-2'>
+                    <a
+                        className='bg-white p-4 text-gray-700 hover:text-gray-950 flex items-center gap-2 rounded-full focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60'
+                        href='https://www.linkedin.com/in/kha-nguyen1301/'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                    >
+                        <BsLinkedin />
+                    </a>
+
+                    <a
+                        className='bg-white p-4 text-gray-700 flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60'
+                        href='https://github.com/khadonnn'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                    >
+                        <FaGithubSquare />
+                    </a>
+                </div>
             </motion.div>
         </section>
     );

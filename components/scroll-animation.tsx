@@ -275,11 +275,11 @@ export default function HeroScrollAnimation() {
                 0,
             );
 
-            // 4. Exit: Fade Out + BLUR (Từ rõ -> Mờ)
+            // 4. Exit: Fade Out + BLUR (Từ rõ -> Mờ) - Giữ opacity 0.1 để preview
             tl.to(
                 canvas,
                 {
-                    opacity: 0,
+                    opacity: 0.1, // Giữ mờ thay vì biến mất hẳn
                     filter: "blur(10px)", // Mờ lại khi biến mất
                     duration: 1.5,
                     ease: "power2.in",
@@ -305,15 +305,16 @@ export default function HeroScrollAnimation() {
     return (
         <section
             ref={containerRef}
-            className='relative w-full overflow-hidden my-20'
+            className='relative w-full overflow-hidden my-[10rem]'
             style={{ height: "100vh" }}
         >
             <div className='absolute inset-0 w-full h-full'>
                 <canvas
                     ref={canvasRef}
-                    className='opacity-0 w-full h-full object-cover'
+                    className='w-full h-full object-cover'
                     style={{
                         pointerEvents: "none",
+                        opacity: 0.1, // Preview mờ ban đầu
                         filter: "blur(10px)", // Khởi tạo mờ
                         willChange: "opacity, transform, filter", // Tối ưu GPU
                         transform: "translateZ(0)",

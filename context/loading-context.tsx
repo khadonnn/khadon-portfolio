@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 type LoadingContextType = {
     isReady: boolean;
@@ -17,6 +18,11 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     const [isReady, setIsReady] = useState(false);
     const [loadProgress, setLoadProgress] = useState(0);
     const [loadError, setLoadError] = useState(false);
+    const pathname = usePathname();
+    
+    // Skip loading screen for certificate pages
+    const isCertificatePage = pathname?.startsWith("/certificate/");
+    const shouldShowLoading = !isCertificatePage && !isReady;
 
     return (
         <LoadingContext.Provider
@@ -29,13 +35,13 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
                 setLoadError,
             }}
         >
-            {/* Hide all content when loading */}
-            <div style={{ visibility: isReady ? "visible" : "hidden" }}>
+            {/* Hide all content when loading (except certificate pages) */}
+            <div style={{ visibility: shouldShowLoading ? "hidden" : "visible" }}>
                 {children}
             </div>
 
             {/* GLOBAL LOADING SCREEN */}
-            {!isReady && (
+            {shouldShowLoading && (
                 <div className='fixed inset-0 z-[99999] flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-opacity duration-700'>
                     <div className='flex flex-col items-center gap-6 p-8'>
                         <div className='relative w-20 h-20'>

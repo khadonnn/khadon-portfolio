@@ -6,10 +6,17 @@ import { links } from "@/lib/data";
 import Link from "next/link";
 import clsx from "clsx";
 import { useActiveSectionContext } from "@/context/active-section-context";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
     const { activeSection, setActiveSection, setTimeOfLastClick } =
         useActiveSectionContext();
+    const pathname = usePathname();
+    
+    // Ẩn header khi ở certificate page
+    if (pathname?.startsWith("/certificate/")) {
+        return null;
+    }
 
     return (
         <header className='z-[999] relative'>
