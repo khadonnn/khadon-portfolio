@@ -12,7 +12,7 @@ export default function Header() {
     const { activeSection, setActiveSection, setTimeOfLastClick } =
         useActiveSectionContext();
     const pathname = usePathname();
-    
+
     // Ẩn header khi ở certificate page
     if (pathname?.startsWith("/certificate/")) {
         return null;

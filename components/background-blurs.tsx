@@ -4,12 +4,12 @@ import { usePathname } from "next/navigation";
 
 export default function BackgroundBlurs() {
     const pathname = usePathname();
-    
+
     // Ẩn background khi ở certificate page
     if (pathname?.startsWith("/certificate/")) {
         return null;
     }
-    
+
     return (
         <>
             <div className='bg-[#ffced0] absolute top-[-6rem] -z-10 right-[11rem] h-[31.25rem] w-[40.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#ff8a8e]'></div>

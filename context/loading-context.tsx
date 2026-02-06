@@ -19,7 +19,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     const [loadProgress, setLoadProgress] = useState(0);
     const [loadError, setLoadError] = useState(false);
     const pathname = usePathname();
-    
+
     // Skip loading screen for certificate pages
     const isCertificatePage = pathname?.startsWith("/certificate/");
     const shouldShowLoading = !isCertificatePage && !isReady;
@@ -36,7 +36,9 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
             }}
         >
             {/* Hide all content when loading (except certificate pages) */}
-            <div style={{ visibility: shouldShowLoading ? "hidden" : "visible" }}>
+            <div
+                style={{ visibility: shouldShowLoading ? "hidden" : "visible" }}
+            >
                 {children}
             </div>
 
