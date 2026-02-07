@@ -5,7 +5,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import cx from "clsx";
 
-gsap.registerPlugin(ScrollTrigger);
+// Chỉ đăng ký plugin một lần nếu chưa có
+if (typeof window !== "undefined") {
+    gsap.registerPlugin(ScrollTrigger);
+}
 
 type HighlightTextProps = {
     children: React.ReactNode;
@@ -24,36 +27,41 @@ const HighlightText = ({
         const el = elRef.current;
         if (!el) return;
 
-        const ctx = gsap.context(() => {
-            // Dùng fromTo để đảm bảo trạng thái ổn định nhất trên mobile
-            gsap.fromTo(
-                el,
-                {
-                    backgroundSize: "100% 0%", // Bắt đầu: 0% chiều cao (ẩn)
-                },
-                {
-                    backgroundSize: "100% 100%", // Kết thúc: 100% chiều cao (hiện full)
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: el,
-                        start: "top 85%", // Hiện khi mép trên chữ chạm 85% màn hình
-                        end: "top 20%", // Vùng kết thúc
+        let ctx: gsap.Context;
 
-                        // QUAN TRỌNG: Bỏ invalidateOnRefresh để tránh giật khi thanh địa chỉ co giãn
-                        // invalidateOnRefresh: true, // <-- Đã xóa dòng này
-
-                        // play: Cuộn xuống gặp -> Chạy hiệu ứng
-                        // none: Cuộn qua luôn -> Giữ nguyên
-                        // none: Cuộn ngược lại vào vùng nhìn thấy -> Giữ nguyên (không chạy lại)
-                        // reverse: Cuộn ngược lên quá khỏi chữ -> Thu lại (ẩn đi)
-                        toggleActions: "play none none reverse",
+        // Thêm setTimeout để đẩy việc khởi tạo xuống cuối hàng đợi render
+        // Giúp đảm bảo các element phía trên (Intro, Antigravity...) đã chiếm chỗ xong
+        const timer = setTimeout(() => {
+            ctx = gsap.context(() => {
+                gsap.fromTo(
+                    el,
+                    {
+                        backgroundSize: "100% 0%",
                     },
-                },
-            );
-        }, el);
+                    {
+                        backgroundSize: "100% 100%",
+                        duration: 0.8,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 85%",
+                            end: "bottom 20%",
+                            toggleActions: "play none none reverse",
+                        },
+                    },
+                );
+            }, el);
 
-        return () => ctx.revert();
+            // QUAN TRỌNG: Ép GSAP tính toán lại vị trí của toàn bộ ScrollTrigger
+            // sau khi component này đã mount xong.
+            ScrollTrigger.refresh();
+        }, 500); // Tăng delay lên 500ms để đảm bảo layout ổn định
+
+        return () => {
+            clearTimeout(timer);
+            // Dấu ? để tránh lỗi nếu component unmount trước khi timeout chạy
+            ctx?.revert();
+        };
     }, []);
 
     return (
@@ -64,16 +72,13 @@ const HighlightText = ({
                 className,
             )}
             style={{
-                // Setup CSS ban đầu
                 backgroundImage: `linear-gradient(to right, ${color}, ${color})`,
-
-                // QUAN TRỌNG: bottom left để neo màu ở đáy -> Nó sẽ mọc lên trên
                 backgroundPosition: "bottom left",
-
-                backgroundSize: "100% 0%", // Mặc định ẩn
+                backgroundSize: "100% 0%",
                 WebkitBoxDecorationBreak: "clone",
                 boxDecorationBreak: "clone",
-                willChange: "background-size", // Báo trước cho trình duyệt mobile để render mượt hơn
+                // will-change giúp browser tối ưu render trước
+                willChange: "background-size",
             }}
         >
             {children}

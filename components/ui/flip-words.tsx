@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "motion/react"; // Đảm bảo import đúng
+import { AnimatePresence, motion } from "framer-motion"; // Dùng framer-motion hoặc motion/react tùy setup của bạn
 import { cn } from "@/lib/utils";
 
 export const FlipWords = ({
@@ -15,8 +15,8 @@ export const FlipWords = ({
     const [currentWord, setCurrentWord] = useState(words[0]);
     const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-    // Không cần logic check mobile phức tạp ở đây để render logic,
-    // ta xử lý bằng CSS sẽ mượt hơn.
+    // 1. BỎ HOÀN TOÀN ĐOẠN CHECK MOBILE ĐỂ CHẶN RENDER
+    // Ta muốn hiệu ứng chạy trên mọi thiết bị
 
     const startAnimation = useCallback(() => {
         const word = words[words.indexOf(currentWord) + 1] || words[0];
@@ -34,77 +34,69 @@ export const FlipWords = ({
     return (
         <div
             className={cn(
-                "inline-grid grid-cols-1 items-center justify-items-center",
+                "relative inline-block w-max align-top", // Giữ layout ổn định
                 className,
             )}
         >
             <AnimatePresence
-                mode='popLayout' // Quan trọng: Giúp layout cũ và mới không bị conflict vị trí
+                mode='popLayout'
                 onExitComplete={() => {
                     setIsAnimating(false);
                 }}
             >
                 <motion.div
                     key={currentWord}
+                    // 2. CẤU HÌNH HIỆU ỨNG BLUR VÀ ĐÀN HỒI (SPRING)
                     initial={{
                         opacity: 0,
-                        y: 10, // Giảm khoảng cách bay để đỡ giật trên mobile
+                        y: 20, // Bay từ dưới lên
+                        filter: "blur(8px)", // Mờ khi bắt đầu
+                        scale: 0.9,
                     }}
                     animate={{
                         opacity: 1,
                         y: 0,
-                    }}
-                    transition={{
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 10,
+                        filter: "blur(0px)", // Hết mờ
+                        scale: 1,
+                        position: "relative",
+                        zIndex: 10,
                     }}
                     exit={{
                         opacity: 0,
-                        y: -10, // Bay lên ít thôi
-                        x: 0, // Đừng bay ngang (x) gây vỡ layout mobile
-                        filter: "blur(8px)",
-                        scale: 0.9, // Thu nhỏ lại thay vì phóng to để tránh tràn màn hình
-                        position: "absolute",
+                        y: -20, // Bay lên trên
+                        filter: "blur(8px)", // Mờ khi biến mất
+                        scale: 0.9,
+                        position: "absolute", // Tuyệt đối để không đẩy layout
+                        top: 0,
+                        left: 0,
+                        right: 0,
                         zIndex: 0,
                     }}
-                    className={cn(
-                        // FIX QUAN TRỌNG:
-                        // 1. z-10: Để từ mới đè lên từ cũ
-                        // 2. whitespace-nowrap: Cấm xuống dòng gây nhảy height
-                        // 3. w-max: Đảm bảo container ôm vừa khít chữ
-                        "z-10 relative text-left text-neutral-900 dark:text-neutral-100 whitespace-nowrap w-max",
-                    )}
+                    // 3. TINH CHỈNH ĐỘ ĐÀN HỒI (BOUNCY)
+                    transition={{
+                        type: "spring",
+                        stiffness: 150, // Độ cứng lò xo (càng cao càng nảy nhanh)
+                        damping: 12, // Độ cản (càng thấp càng rung lắc nhiều)
+                        mass: 0.8, // Trọng lượng (nhẹ thì bay nhanh)
+                    }}
+                    className='inline-block whitespace-nowrap text-left text-neutral-900 dark:text-neutral-100 will-change-transform will-change-filter' // will-change giúp GPU xử lý mượt hơn
                 >
                     {/* Render từng ký tự */}
                     {currentWord.split(" ").map((word, wordIndex) => (
                         <motion.span
                             key={word + wordIndex}
-                            initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
-                            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                            transition={{
-                                delay: wordIndex * 0.3,
-                                duration: 0.3,
-                            }}
                             className='inline-block whitespace-nowrap'
                         >
                             {word.split("").map((letter, letterIndex) => (
                                 <motion.span
                                     key={word + letterIndex}
-                                    initial={{
-                                        opacity: 0,
-                                        y: 10,
-                                        filter: "blur(8px)",
-                                    }}
-                                    animate={{
-                                        opacity: 1,
-                                        y: 0,
-                                        filter: "blur(0px)",
-                                    }}
+                                    // 4. CHỈ ANIMATE VỊ TRÍ (Y), KHÔNG ANIMATE BLUR Ở LEVEL KÝ TỰ
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     transition={{
                                         delay:
-                                            wordIndex * 0.3 +
-                                            letterIndex * 0.05,
+                                            wordIndex * 0.2 +
+                                            letterIndex * 0.03, // Hiệu ứng sóng nhẹ
                                         duration: 0.2,
                                     }}
                                     className='inline-block'
