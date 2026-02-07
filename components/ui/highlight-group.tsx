@@ -11,7 +11,10 @@ const HighlightGroup = ({ children }: { children: React.ReactNode }) => {
     useLayoutEffect(() => {
         const el = groupRef.current;
         if (!el) return;
-        gsap.set(el, { backgroundSize: "100% 0%", backgroundPosition: "bottom" });
+        gsap.set(el, {
+            backgroundSize: "100% 0%",
+            backgroundPosition: "bottom",
+        });
         gsap.to(el, {
             backgroundSize: "100% 100%",
             backgroundPosition: "bottom",
@@ -31,7 +34,7 @@ const HighlightGroup = ({ children }: { children: React.ReactNode }) => {
     return (
         <span
             ref={groupRef}
-            className="relative inline px-1 mx-1 rounded-sm bg-no-repeat bg-bottom box-decoration-clone"
+            className='relative inline px-1 mx-1 rounded-sm bg-no-repeat bg-bottom box-decoration-clone'
             style={{
                 backgroundImage: `linear-gradient(to right, #fcd34d, #fcd34d)`,
                 backgroundPosition: "bottom",

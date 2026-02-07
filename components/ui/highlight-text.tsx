@@ -46,7 +46,6 @@ const HighlightText = ({
                     // Recalculate positions when ScrollTrigger refreshes (needed after pinned sections)
                     invalidateOnRefresh: true,
 
-
                     // play: Scroll xuống gặp → Hiện (từ dưới lên)
                     // none: Scroll qua xuống → Giữ nguyên
                     // none: Scroll ngược lại thấy → Giữ nguyên
