@@ -11,6 +11,7 @@ import { useSectionInView } from "@/lib/hooks";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import { FlipWords } from "./ui/flip-words";
 import ButtonGsap from "./ui/buttonGsap"; // Đảm bảo đường dẫn đúng
+import Antigravity from "./Antigravity";
 
 const Intro = () => {
     const { ref } = useSectionInView("Home");
@@ -42,9 +43,10 @@ const Intro = () => {
     return (
         <section
             id='home'
-            className='mb-28 max-w-[50rem] text-center sm:mb-0 scroll-mt-[100rem]'
+            className='relative mb-28 max-w-[50rem] text-center sm:mb-0 scroll-mt-[100rem]'
             ref={ref}
         >
+            {/* Antigravity moved to page header for full-width coverage */}
             <div className='flex items-center justify-center'>
                 <div className='relative'>
                     <motion.div
@@ -109,6 +111,7 @@ const Intro = () => {
                 {/* Nút Contact Me */}
                 <ButtonGsap
                     onClick={handleContactClick}
+                    data-antigravity-target
                     // Override chỉ light mode, dark mode dùng design gốc (trắng)
                     className='bg-gray-900 text-white hover:bg-gray-950 border-none group'
                 >
@@ -122,6 +125,7 @@ const Intro = () => {
                 <ButtonGsap
                     color='secondary'
                     onClick={handleDownloadClick}
+                    data-antigravity-target
                     // Override class để nền trắng
                     className='bg-white dark:bg-white/10 text-gray-700 dark:text-white/90 border-black/10 dark:border-white/10 group'
                 >
