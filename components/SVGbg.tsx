@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.normalizeScroll(true); // Normalize scroll behavior for smoother mobile experience
 }
 
 const SVGbg = () => {
@@ -79,16 +80,18 @@ const SVGbg = () => {
         let ctx = gsap.context(() => {
             // Delay animation start to ensure other ScrollTriggers are ready
             setTimeout(() => {
+                const isMobile = window.innerWidth < 768;
                 gsap.to(path, {
                     strokeDashoffset: 0,
                     ease: "none",
+                    force3D: true, // Enable GPU acceleration for smoother animation
                     scrollTrigger: {
                         id: "svg-bg-draw",
                         trigger: triggerEl,
-                        // Chỉ bắt đầu khi scroll animation đã qua (about section vào viewport)
-                        start: "top 60%",
-                        end: "bottom 80%",
-                        scrub: 1,
+                        // Adjust start/end for mobile to trigger earlier and smoother
+                        start: isMobile ? "top 70%" : "top 60%",
+                        end: isMobile ? "bottom 70%" : "bottom 80%",
+                        scrub: isMobile ? 0.5 : 1, // Smoother scrub on mobile
                         invalidateOnRefresh: true,
                         // markers: true, // enable for debugging
                     },

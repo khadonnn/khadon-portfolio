@@ -13,6 +13,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Tooltip } from "./tooltip-card";
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.normalizeScroll(true); // Normalize scroll behavior for smoother mobile experience
 
 export const AnimatedTooltip = ({
     items,

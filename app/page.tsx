@@ -1,3 +1,4 @@
+"use client";
 import About from "@/components/about";
 import { Certificate } from "@/components/certification";
 import Contact from "@/components/contact";
