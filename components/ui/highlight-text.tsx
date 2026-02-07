@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useLayoutEffect, useRef } from "react";
-import { gsap } from "gsap";
+import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import cx from "clsx";
 
@@ -24,7 +24,7 @@ const HighlightText = ({
         const el = elRef.current;
         if (!el) return;
 
-        let ctx = gsap.context(() => {
+        const ctx = gsap.context(() => {
             // 1. Reset trạng thái ban đầu - Hiệu ứng từ dưới lên
             gsap.set(el, {
                 backgroundSize: "100% 0%",
@@ -43,6 +43,9 @@ const HighlightText = ({
                     start: "center 80%",
                     // Kết thúc khi center phần tử chạm 20% viewport (scroll ngược lên qua đây sẽ ẩn)
                     end: "center 20%",
+                    // Recalculate positions when ScrollTrigger refreshes (needed after pinned sections)
+                    invalidateOnRefresh: true,
+
 
                     // play: Scroll xuống gặp → Hiện (từ dưới lên)
                     // none: Scroll qua xuống → Giữ nguyên
@@ -51,7 +54,11 @@ const HighlightText = ({
                     toggleActions: "play none none reverse",
                 },
             });
-        }, elRef);
+
+            // Force a refresh after layout/pinning settles (hero pin may change layout later)
+            // small timeout so refresh runs after other init code (and after hero init if it runs)
+            setTimeout(() => ScrollTrigger.refresh(), 50);
+        }, el);
 
         return () => ctx.revert();
     }, []);
@@ -61,12 +68,11 @@ const HighlightText = ({
             ref={elRef}
             className={cx(
                 "relative inline px-1 mx-1 rounded-sm bg-no-repeat bg-bottom box-decoration-clone",
-                "text-gray-900 dark:text-gray-900", // Chữ luôn màu tối để dễ đọc trên nền sáng
                 className,
             )}
             style={{
                 backgroundImage: `linear-gradient(to right, ${color}, ${color})`,
-                backgroundPosition: "bottom", // Anchor ở đáy để trượt từ dưới lên
+                backgroundPosition: "bottom",
                 WebkitBoxDecorationBreak: "clone",
                 boxDecorationBreak: "clone",
             }}

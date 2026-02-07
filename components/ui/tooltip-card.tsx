@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -7,10 +8,14 @@ export const Tooltip = ({
     content,
     children,
     containerClassName,
+    visible,
+    onClose,
 }: {
-    content: string | React.ReactNode;
+    content: React.ReactNode;
     children: React.ReactNode;
     containerClassName?: string;
+    visible?: boolean;
+    onClose?: () => void;
 }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [mouse, setMouse] = useState<{ x: number; y: number }>({
@@ -28,27 +33,16 @@ export const Tooltip = ({
     useEffect(() => {
         if (!isVisible || !contentRef.current) return;
 
-        // Hàm cập nhật chiều cao
         const updateHeight = () => {
-            if (contentRef.current) {
-                setHeight(contentRef.current.scrollHeight);
-            }
+            if (contentRef.current) setHeight(contentRef.current.scrollHeight);
         };
 
-        // 1. Tính ngay lập tức lúc hover
         updateHeight();
 
-        // 2. Sử dụng ResizeObserver để lắng nghe thay đổi kích thước
-        // (Ví dụ: khi ảnh load xong, div sẽ to ra, observer sẽ báo)
-        const observer = new ResizeObserver(() => {
-            updateHeight();
-        });
-
+        const observer = new ResizeObserver(() => updateHeight());
         observer.observe(contentRef.current);
 
-        return () => {
-            observer.disconnect();
-        };
+        return () => observer.disconnect();
     }, [isVisible, content]);
 
     const calculatePosition = (mouseX: number, mouseY: number) => {
@@ -61,36 +55,21 @@ export const Tooltip = ({
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        // Get tooltip dimensions
-        const tooltipWidth = 240; // min-w-[15rem] = 240px
+        const tooltipWidth = 240;
         const tooltipHeight = tooltip.scrollHeight;
 
-        // Calculate absolute position relative to viewport
         const absoluteX = containerRect.left + mouseX;
         const absoluteY = containerRect.top + mouseY;
 
         let finalX = mouseX + 12;
         let finalY = mouseY + 12;
 
-        // Check if tooltip goes beyond right edge
-        if (absoluteX + 12 + tooltipWidth > viewportWidth) {
+        if (absoluteX + 12 + tooltipWidth > viewportWidth)
             finalX = mouseX - tooltipWidth - 12;
-        }
-
-        // Check if tooltip goes beyond left edge
-        if (absoluteX + finalX < 0) {
-            finalX = -containerRect.left + 12;
-        }
-
-        // Check if tooltip goes beyond bottom edge
-        if (absoluteY + 12 + tooltipHeight > viewportHeight) {
+        if (absoluteX + finalX < 0) finalX = -containerRect.left + 12;
+        if (absoluteY + 12 + tooltipHeight > viewportHeight)
             finalY = mouseY - tooltipHeight - 12;
-        }
-
-        // Check if tooltip goes beyond top edge
-        if (absoluteY + finalY < 0) {
-            finalY = -containerRect.top + 12;
-        }
+        if (absoluteY + finalY < 0) finalY = -containerRect.top + 12;
 
         return { x: finalX, y: finalY };
     };
@@ -133,7 +112,6 @@ export const Tooltip = ({
     };
 
     const handleTouchEnd = () => {
-        // Delay hiding to allow for tap interaction
         setTimeout(() => {
             setIsVisible(false);
             setMouse({ x: 0, y: 0 });
@@ -142,7 +120,6 @@ export const Tooltip = ({
     };
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        // Toggle visibility on click for mobile devices
         if (window.matchMedia("(hover: none)").matches) {
             e.preventDefault();
             if (isVisible) {
@@ -159,13 +136,16 @@ export const Tooltip = ({
         }
     };
 
-    // Update position when tooltip becomes visible or content changes
     useEffect(() => {
         if (isVisible && contentRef.current) {
             const newPosition = calculatePosition(mouse.x, mouse.y);
             setPosition(newPosition);
         }
     }, [isVisible, height, mouse.x, mouse.y]);
+
+    useEffect(() => {
+        if (typeof visible === "boolean") setIsVisible(visible);
+    }, [visible]);
 
     return (
         <div
@@ -191,16 +171,27 @@ export const Tooltip = ({
                             stiffness: 200,
                             damping: 20,
                         }}
-                        className='pointer-events-none absolute z-50 min-w-[15rem] overflow-hidden rounded-md border border-transparent bg-white shadow-sm ring-1 shadow-black/5 ring-black/5 dark:bg-neutral-900 dark:shadow-white/10 dark:ring-white/5'
-                        style={{
-                            top: position.y,
-                            left: position.x,
-                        }}
+                        className='absolute z-50 min-w-[15rem] overflow-hidden rounded-md border border-transparent bg-white shadow-sm ring-1 shadow-black/5 ring-black/5 dark:bg-neutral-900 dark:shadow-white/10 dark:ring-white/5'
+                        style={{ top: position.y, left: position.x }}
+                        onMouseEnter={() => setIsVisible(true)}
+                        onMouseLeave={() => setIsVisible(false)}
                     >
                         <div
                             ref={contentRef}
-                            className='p-2 text-sm text-neutral-600 md:p-4 dark:text-neutral-400'
+                            className='relative p-2 text-sm text-neutral-600 md:p-4 dark:text-neutral-400'
                         >
+                            {onClose && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onClose();
+                                    }}
+                                    className='absolute right-2 top-2 z-50 rounded-sm bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/10'
+                                    aria-label='Close tooltip'
+                                >
+                                    ×
+                                </button>
+                            )}
                             {content}
                         </div>
                     </motion.div>

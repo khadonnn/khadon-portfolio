@@ -5,7 +5,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import SectionHeading from "@/components/section-heading";
 import { useSectionInView } from "@/lib/hooks";
-import { Tooltip } from "@/components/ui/tooltip-card";
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 export default function About() {
     const { ref } = useSectionInView("About");
     return (
@@ -20,15 +20,29 @@ export default function About() {
             <SectionHeading>About Me</SectionHeading>
             <div className='mb-3'>
                 After graduating with my first degree in{" "}
-                <Tooltip content={<FirstDegree />}>
-                    <span className='font-medium underline'>
-                        Busines Administration
-                    </span>
-                </Tooltip>{" "}
+                <AnimatedTooltip
+                    items={[
+                        {
+                            id: 1,
+                            name: "Busines Administration",
+                            designation: "First Degree",
+                            content: <FirstDegree />,
+                        },
+                    ]}
+                    autoActivateOnScroll
+                />{" "}
                 at the{" "}
-                <Tooltip containerClassName=' underline' content={<TDTCard />}>
-                    <span className='font-bold'>TDT</span>
-                </Tooltip>{" "}
+                <AnimatedTooltip
+                    items={[
+                        {
+                            id: 2,
+                            name: "TDT",
+                            designation: "TDTU",
+                            content: <TDTCard />,
+                        },
+                    ]}
+                    autoActivateOnScroll
+                />{" "}
                 University . I decided to pursue my passion for programming. I
                 enrolled in a coding bootcamp and learned{" "}
                 <span className='font-medium'>full-stack web development</span>.{" "}
@@ -54,11 +68,17 @@ export default function About() {
                 <span className='underline'>Second degree</span>, where I focus
                 on deepening my knowledge and honing my expertise in the field.
                 I am enrolled at the{" "}
-                <Tooltip content={<UITCard />}>
-                    <span className='font-medium underline'>
-                        University of Information Technology - CITD
-                    </span>
-                </Tooltip>
+                <AnimatedTooltip
+                    items={[
+                        {
+                            id: 3,
+                            name: "University of Information Technology - CITD",
+                            designation: "UIT",
+                            content: <UITCard />,
+                        },
+                    ]}
+                    autoActivateOnScroll
+                />
                 , actively learning and embracing new concepts to grow as a
                 developer.
             </div>

@@ -239,10 +239,12 @@ export default function HeroScrollAnimation() {
                     end: "+=2000",
                     scrub: 0.3,
                     pin: true,
-                    invalidateOnRefresh: true,
+                        invalidateOnRefresh: true,
                     fastScrollEnd: true,
                 },
             });
+                // Ensure other ScrollTriggers recalculate after the hero pin/layout changes
+                ScrollTrigger.refresh();
 
             // 1. Enter: Fade In + UNBLUR (Từ mờ -> Rõ)
             tl.to(canvas, {
