@@ -1,25 +1,56 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function BackgroundBlurs() {
     const pathname = usePathname();
 
-    // Ẩn background khi ở certificate page
     if (pathname?.startsWith("/certificate/")) {
         return null;
     }
 
     return (
         <>
-            {/* <div className='bg-[#ffced0] absolute top-[-6rem] -z-10 right-[11rem] h-[31.25rem] w-[40.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#ff8a8e]'></div>
-            <div className='bg-[#e8bdf8] absolute top-[-1rem] -z-10 left-[-35rem] h-[31.25rem] w-[31rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#dc93f6]'></div> */}
-            {/* Blob Phải - Tông Đỏ/Hồng (Điểm cuối của gradient) */}
-            {/* Blob Phải - Light: Hồng phấn | Dark: Đỏ đất mờ (nhìn thấy được) */}
-            <div className='bg-[#fbe2e3] opacity-20 absolute top-[-6rem] -z-10 right-[11rem] h-[31.25rem] w-[40.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#946263] dark:opacity-10'></div>
+            {/* Z-index: -z-[5] để nằm trên blobs nền nhưng dưới nội dung web */}
+            <div className='fixed top-0 left-0 w-full h-full overflow-hidden -z-[5] pointer-events-none'>
+                {/* Vệt nắng 1: VÀNG CAM ĐẬM (Chiếu từ trái) */}
+                <motion.div
+                    // from-yellow-500/40: Màu vàng đậm, độ trong suốt 40% (rất rõ)
+                    // dark:from-blue-600/30: Màu xanh dương đậm cho chế độ tối
+                    className='absolute top-[-10%] left-[-10%] h-[80vh] w-[20vw] bg-gradient-to-b from-pink-500/40 via-pink-300/10 to-transparent rounded-full blur-2xl dark:from-blue-600/30 dark:via-purple-900/10'
+                    initial={{ rotate: 35, opacity: 0.5 }}
+                    animate={{
+                        opacity: [0.4, 0.7, 0.4], // Nhấp nháy mạnh hơn
+                        rotate: [35, 30, 35], // Góc xoay
+                        x: [0, 40, 0], // Di chuyển rộng hơn
+                    }}
+                    transition={{
+                        duration: 7,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut",
+                    }}
+                />
 
-            {/* Blob Trái - Light: Tím nhạt | Dark: Tím than mờ (nhìn thấy được) */}
-            <div className='bg-[#dbd7fb] opacity-20 absolute top-[-1rem] -z-10 left-[-35rem] h-[31.25rem] w-[31rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#676394] dark:opacity-20'></div>
+                {/* Vệt nắng 2: VÀNG CHANH (Chiếu từ phải) */}
+                <motion.div
+                    className='absolute top-[-20%] right-[5%] h-[100vh] w-[25vw] bg-gradient-to-b from-slate-400/30 via-slate-100/5 to-transparent rounded-full blur-3xl dark:from-indigo-400/30 dark:via-transparent'
+                    initial={{ rotate: -45, opacity: 0.5 }}
+                    animate={{
+                        opacity: [0.3, 0.6, 0.3],
+                        rotate: [-45, -40, -45],
+                        scaleX: [1, 1.3, 1],
+                    }}
+                    transition={{
+                        duration: 9,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut",
+                        delay: 0.5,
+                    }}
+                />
+            </div>
         </>
     );
 }

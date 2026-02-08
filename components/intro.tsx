@@ -6,12 +6,11 @@ import { motion } from "framer-motion";
 import { BsArrowRight, BsLinkedin } from "react-icons/bs";
 import { HiDownload } from "react-icons/hi";
 import { FaGithubSquare } from "react-icons/fa";
-// import Link from "next/link"; // Không cần dùng Link nữa vì ta dùng Button scroll
 import { useSectionInView } from "@/lib/hooks";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import { FlipWords } from "./ui/flip-words";
-import ButtonGsap from "./ui/buttonGsap"; // Đảm bảo đường dẫn đúng
-import Antigravity from "./Antigravity";
+import ButtonGsap from "./ui/buttonGsap";
+// import Antigravity from "./Antigravity"; // Nếu bạn cần dùng thì uncomment
 
 const Intro = () => {
     const { ref } = useSectionInView("Home");
@@ -22,7 +21,6 @@ const Intro = () => {
     const handleContactClick = () => {
         setActiveSection("Contact");
         setTimeOfLastClick(Date.now());
-        // Tìm section contact và scroll tới đó
         const contactSection = document.querySelector("#contact");
         if (contactSection) {
             contactSection.scrollIntoView({ behavior: "smooth" });
@@ -31,7 +29,6 @@ const Intro = () => {
 
     // Hàm xử lý download CV
     const handleDownloadClick = () => {
-        // Tạo thẻ a ảo để kích hoạt download
         const link = document.createElement("a");
         link.href = "/Khadon_CV.pdf";
         link.download = "Khadon_CV.pdf";
@@ -46,10 +43,45 @@ const Intro = () => {
             className='relative mb-28 max-w-[50rem] text-center sm:mb-0 scroll-mt-[100rem]'
             ref={ref}
         >
-            {/* Antigravity moved to page header for full-width coverage */}
+            {/* --- PHẦN AVATAR VÀ CHỮ KÝ ĐÃ SỬA --- */}
             <div className='flex items-center justify-center'>
-                <div className='relative'>
+                {/* Wrapper: w-max giúp khung này co lại vừa khít ảnh, relative để làm mốc tọa độ */}
+                <div className='relative w-max'>
+                    {/* 1. CHỮ KÝ (Đặt lại vị trí sang Góc Phải) */}
+                    <motion.span
+                        // chữ bắt đầu tại góc phải ảnh: đặt left-full để left edge của chữ trùng right edge của avatar
+                        className='absolute top-8 left-full text-4xl sm:text-5xl font-pencerio font-thin text-gray-500 dark:text-gray-400 z-20 whitespace-nowrap pointer-events-none'
+                        style={{ transformOrigin: "top left" }}
+                        // rotate negative để chữ nghiêng xuống từ phải sang trái (bắt đầu ở phải)
+                        initial={{
+                            opacity: 0,
+                            scale: 0.6,
+                            x: 8,
+                            y: -6,
+                            rotate: -12,
+                            skewX: "-8deg",
+                        }}
+                        animate={{
+                            opacity: 1,
+                            scale: 1,
+                            x: 0,
+                            y: 0,
+                            rotate: -12,
+                            skewX: "-8deg",
+                        }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 125,
+                            delay: 0.2,
+                            duration: 0.7,
+                        }}
+                    >
+                        KhaDonDev
+                    </motion.span>
+
+                    {/* 2. ẢNH AVATAR (Giữ nguyên) */}
                     <motion.div
+                        className='relative z-10'
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{
@@ -69,20 +101,24 @@ const Intro = () => {
                             className='h-28 w-28 rounded-full object-cover border-[0.30rem] border-white shadow-xl dark:border-gray-800 dark:bg-gray-50 dark:bg-opacity-10'
                         />
                     </motion.div>
+
+                    {/* 3. ICON VẪY TAY (Giữ nguyên) */}
                     <motion.span
-                        className='text-4xl absolute bottom-0 right-0'
+                        className='text-4xl absolute bottom-0 right-0 z-20'
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{
-                            type: "tween",
-                            duration: 0.2,
-                            ease: "easeOut",
+                            type: "spring",
+                            stiffness: 125,
+                            delay: 0.1,
+                            duration: 0.7,
                         }}
                     >
                         👋
                     </motion.span>
                 </div>
             </div>
+            {/* --- KẾT THÚC PHẦN AVATAR --- */}
 
             <motion.h2
                 className='mb-10 mt-4 px-4 text-xl font-medium !leading-[1.5] sm:text-3xl '
@@ -93,10 +129,13 @@ const Intro = () => {
                 <span className='font-bold'>full-stack developer</span> with{" "}
                 <span className='font-bold'>8 months</span> of experience. I
                 enjoy building <span className='italic'>websites & apps</span>.
-                My focus is{" "}
-                <strong>
-                    <FlipWords words={words} />
-                </strong>{" "}
+                <span className='hidden md:inline'>
+                    {" "}
+                    My focus is{" "}
+                    <strong>
+                        <FlipWords words={words} />
+                    </strong>{" "}
+                </span>
                 <br />
             </motion.h2>
 
@@ -112,7 +151,6 @@ const Intro = () => {
                 <ButtonGsap
                     onClick={handleContactClick}
                     data-antigravity-target
-                    // Override chỉ light mode, dark mode dùng design gốc (trắng)
                     className='bg-gray-900 text-white hover:bg-gray-950 border-none group'
                 >
                     <div className='flex items-center gap-2'>
@@ -126,7 +164,6 @@ const Intro = () => {
                     color='secondary'
                     onClick={handleDownloadClick}
                     data-antigravity-target
-                    // Override class để nền trắng
                     className='bg-white dark:bg-white/10 text-gray-700 dark:text-white/90 border-black/10 dark:border-white/10 group'
                 >
                     <div className='flex items-center gap-2'>
@@ -135,7 +172,7 @@ const Intro = () => {
                     </div>
                 </ButtonGsap>
 
-                {/* Các nút icon social giữ nguyên thẻ a vì chúng quá nhỏ cho hiệu ứng ripple lớn */}
+                {/* Các nút icon social */}
                 <div className='flex gap-2'>
                     <a
                         className='bg-white p-4 text-gray-700 hover:text-gray-950 flex items-center gap-2 rounded-full focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60'
