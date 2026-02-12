@@ -10,7 +10,6 @@ import { useSectionInView } from "@/lib/hooks";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import { FlipWords } from "./ui/flip-words";
 import ButtonGsap from "./ui/buttonGsap";
-// import Antigravity from "./Antigravity"; // Nếu bạn cần dùng thì uncomment
 
 const Intro = () => {
     const { ref } = useSectionInView("Home");
@@ -43,16 +42,11 @@ const Intro = () => {
             className='relative mb-28 max-w-[50rem] text-center sm:mb-0 scroll-mt-[100rem]'
             ref={ref}
         >
-            {/* --- PHẦN AVATAR VÀ CHỮ KÝ ĐÃ SỬA --- */}
-            <div className='flex items-center justify-center'>
-                {/* Wrapper: w-max giúp khung này co lại vừa khít ảnh, relative để làm mốc tọa độ */}
+            <div className='flex items-center justify-center py-10'>
                 <div className='relative w-max'>
-                    {/* 1. CHỮ KÝ (Đặt lại vị trí sang Góc Phải) */}
                     <motion.span
-                        // chữ bắt đầu tại góc phải ảnh: đặt left-full để left edge của chữ trùng right edge của avatar
-                        className='absolute top-8 left-full text-4xl sm:text-5xl font-pencerio font-thin text-gray-500 dark:text-gray-400 z-20 whitespace-nowrap pointer-events-none'
+                        className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-500 dark:text-gray-400 z-20 whitespace-nowrap pointer-events-none'
                         style={{ transformOrigin: "top left" }}
-                        // rotate negative để chữ nghiêng xuống từ phải sang trái (bắt đầu ở phải)
                         initial={{
                             opacity: 0,
                             scale: 0.6,
@@ -79,7 +73,6 @@ const Intro = () => {
                         KhaDonDev
                     </motion.span>
 
-                    {/* 2. ẢNH AVATAR (Giữ nguyên) */}
                     <motion.div
                         className='relative z-10'
                         initial={{ scale: 0 }}
@@ -102,7 +95,6 @@ const Intro = () => {
                         />
                     </motion.div>
 
-                    {/* 3. ICON VẪY TAY (Giữ nguyên) */}
                     <motion.span
                         className='text-4xl absolute bottom-0 right-0 z-20'
                         initial={{ opacity: 0, scale: 0 }}
@@ -118,17 +110,14 @@ const Intro = () => {
                     </motion.span>
                 </div>
             </div>
-            {/* --- KẾT THÚC PHẦN AVATAR --- */}
 
             <motion.h2
                 className='mb-10 mt-4 px-4 text-xl font-medium !leading-[1.5] sm:text-3xl '
                 initial={{ opacity: 0, y: 100 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <span className='font-bold'>Hello, I'm Khadondev.</span> I'm a{" "}
-                <span className='font-bold'>full-stack developer</span> with{" "}
-                <span className='font-bold'>8 months</span> of experience. I
-                enjoy building <span className='italic'>websites & apps</span>.
+                <b>Hi, I'm Khadondev.</b> A <b>Full-stack Developer</b> (8
+                months exp) passionate about building <i>web & apps</i>.
                 <span className='hidden md:inline'>
                     {" "}
                     My focus is{" "}

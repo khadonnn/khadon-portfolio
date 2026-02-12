@@ -17,35 +17,18 @@ export const ScrollAnimatedTooltip = ({
     children: React.ReactNode;
     containerClassName?: string;
 }) => {
-    const containerRef = useRef<HTMLSpanElement | null>(null);
-    const [visibleOnScroll, setVisibleOnScroll] = useState(false);
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-
-        const st = ScrollTrigger.create({
-            trigger: el,
-            start: "top 80%",
-            end: "bottom 20%",
-            onEnter: () => setVisibleOnScroll(true),
-            onEnterBack: () => setVisibleOnScroll(true),
-            onLeave: () => setVisibleOnScroll(false),
-            onLeaveBack: () => setVisibleOnScroll(false),
-        });
-
-        return () => {
-            try {
-                st.kill();
-            } catch (e) {
-                // ignore
-            }
-        };
-    }, []);
+    // 1. Dùng state để quản lý việc hover
+    const [isHovered, setIsHovered] = useState(false);
 
     return (
-        <span ref={containerRef} className={containerClassName}>
-            <Tooltip content={content} visible={visibleOnScroll}>
+        <span
+            className={containerClassName}
+            // 2. Thêm sự kiện hover
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {/* 3. Truyền biến visible dựa trên hover */}
+            <Tooltip content={content} visible={isHovered}>
                 {children}
             </Tooltip>
         </span>

@@ -5,7 +5,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import SectionHeading from "@/components/section-heading";
 import { useSectionInView } from "@/lib/hooks";
-import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { ScrollAnimatedTooltip } from "@/components/ui/scroll-animated-tooltip";
 export default function About() {
     const { ref } = useSectionInView("About");
     return (
@@ -18,69 +18,43 @@ export default function About() {
             ref={ref}
         >
             <SectionHeading>About Me</SectionHeading>
-            <div className='mb-3'>
-                After graduating with my first degree in{" "}
-                <AnimatedTooltip
-                    items={[
-                        {
-                            id: 1,
-                            name: "Busines Administration",
-                            designation: "First Degree",
-                            content: <FirstDegree />,
-                        },
-                    ]}
-                    autoActivateOnScroll
-                />{" "}
-                at the{" "}
-                <AnimatedTooltip
-                    items={[
-                        {
-                            id: 2,
-                            name: "TDT",
-                            designation: "TDTU",
-                            content: <TDTCard />,
-                        },
-                    ]}
-                    autoActivateOnScroll
-                />{" "}
-                University . I decided to pursue my passion for programming. I
-                enrolled in a coding bootcamp and learned{" "}
-                <span className='font-medium'>full-stack web development</span>.{" "}
-                <span className='italic'>My favorite part of programming</span>{" "}
-                is the problem-solving aspect. I love the feeling of finally
-                figuring out a solution to a problem. My core stack is{" "}
-                <span className='font-medium'>
-                    React, Next.js, Typescript and MongoDB
+            <div className='mb-4 text-lg leading-relaxed'>
+                After a degree in{" "}
+                <ScrollAnimatedTooltip content={<FirstDegree />}>
+                    <b className='underline font-semibold'>
+                        Business Administration
+                    </b>
+                </ScrollAnimatedTooltip>{" "}
+                at{" "}
+                <ScrollAnimatedTooltip
+                    containerClassName='underline'
+                    content={<TDTCard />}
+                >
+                    <b className='underline'>TDTU</b>
+                </ScrollAnimatedTooltip>
+                , I pivoted to{" "}
+                <span className='font-semibold'>Full-stack Development</span>. I
+                love solving complex problems using
+                <span className='font-semibold text-blue-600'>
+                    {" "}
+                    React, Next.js, TypeScript, and MongoDB.
                 </span>
-                . I am also familiar with TypeScript and Prisma. I am always
-                looking to learn new technologies. I am currently looking for a{" "}
-                <span className='font-medium'>full-time position</span> as a
-                software developer.
             </div>
 
-            <div>
-                Every day,{" "}
-                <span className='italic'>
-                    I dedicate over 8 hours to coding and expanding my
-                    skills.{" "}
-                </span>
-                Currently, I am pursuing a{" "}
-                <span className='underline'>Second degree</span>, where I focus
-                on deepening my knowledge and honing my expertise in the field.
-                I am enrolled at the{" "}
-                <AnimatedTooltip
-                    items={[
-                        {
-                            id: 3,
-                            name: "University of Information Technology - CITD",
-                            designation: "UIT",
-                            content: <UITCard />,
-                        },
-                    ]}
-                    autoActivateOnScroll
-                />
-                , actively learning and embracing new concepts to grow as a
-                developer.
+            <div className='text-lg leading-relaxed'>
+                Coding{" "}
+                <span className='italic font-medium'>8+ hours daily</span>, I am
+                now pursuing a{" "}
+                <span className='underline font-medium'>Second Degree</span> at{" "}
+                <ScrollAnimatedTooltip content={<UITCard />}>
+                    <b className='underline'>UIT</b>
+                </ScrollAnimatedTooltip>{" "}
+                to deepen my expertise. I am seeking a
+                <span className='font-bold'>
+                    {" "}
+                    full-time software developer{" "}
+                </span>{" "}
+                role to contribute and grow.
             </div>
         </motion.section>
     );

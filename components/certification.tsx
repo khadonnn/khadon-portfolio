@@ -1,12 +1,83 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import { useSectionInView } from "@/lib/hooks";
 import SectionHeading from "@/components/section-heading";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { certificates } from "@/lib/data";
+
+// Wrapper component for scroll animation
+function CertificateCard({
+    certificate,
+    index,
+    onOpenModal,
+}: {
+    certificate: (typeof certificates)[number];
+    index: number;
+    onOpenModal: (imageUrl: string) => void;
+}) {
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ["0 1", "1.33 1"],
+    });
+    const scaleProgress = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
+    const opacityProgress = useTransform(scrollYProgress, [0, 1], [0.6, 1]);
+
+    return (
+        <motion.div
+            ref={ref}
+            style={{
+                scale: scaleProgress,
+                opacity: opacityProgress,
+            }}
+        >
+            <CardContainer className='inter-var'>
+                <CardBody className='bg-gray-50 relative group/card hover:shadow-purple-500/[0.4] shadow-2xl dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.3] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full sm:w-[30rem] h-auto rounded-xl p-6 border'>
+                    <CardItem
+                        translateZ='50'
+                        className='text-xl font-bold text-neutral-600 dark:text-white'
+                    >
+                        {certificate.title}
+                    </CardItem>
+                    <CardItem
+                        as='p'
+                        translateZ='60'
+                        className='text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300'
+                    >
+                        {certificate.description}
+                    </CardItem>
+                    <CardItem
+                        translateZ='100'
+                        className='w-full mt-4 cursor-pointer'
+                        onClick={() => onOpenModal(certificate.imageSrc)}
+                    >
+                        <Image
+                            src={certificate.imageSrc}
+                            height='1000'
+                            width='1000'
+                            className='h-60 w-full object-cover object-center rounded-xl group-hover/card:shadow-xl'
+                            alt={certificate.altText}
+                            style={{ aspectRatio: "16/9" }}
+                        />
+                    </CardItem>
+                    <div className='flex justify-end items-center mt-10'>
+                        <CardItem
+                            translateZ={20}
+                            as='a'
+                            href={`/certificate/${certificate.slug}`}
+                            className='px-4 py-2 rounded-xl bg-black dark:bg-white dark:text-black text-white text-sm font-bold cursor-pointer'
+                        >
+                            🔗 Open Shareable Link
+                        </CardItem>
+                    </div>
+                </CardBody>
+            </CardContainer>
+        </motion.div>
+    );
+}
 
 export function Certificate() {
     const { ref } = useSectionInView("Certificate");
@@ -36,48 +107,12 @@ export function Certificate() {
             <SectionHeading>Certificate</SectionHeading>
             <div className='flex justify-center gap-5 flex-wrap pb-24'>
                 {certificates.map((certificate, index) => (
-                    <CardContainer key={index} className='inter-var'>
-                        <CardBody className='bg-gray-50 relative group/card hover:shadow-purple-500/[0.4] shadow-2xl dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.3] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border'>
-                            <CardItem
-                                translateZ='50'
-                                className='text-xl font-bold text-neutral-600 dark:text-white'
-                            >
-                                {certificate.title}
-                            </CardItem>
-                            <CardItem
-                                as='p'
-                                translateZ='60'
-                                className='text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300'
-                            >
-                                {certificate.description}
-                            </CardItem>
-                            <CardItem
-                                translateZ='100'
-                                className='w-full mt-4 cursor-pointer'
-                                onClick={() =>
-                                    handleOpenModal(certificate.imageSrc)
-                                }
-                            >
-                                <Image
-                                    src={certificate.imageSrc}
-                                    height='1000'
-                                    width='1000'
-                                    className='h-60 w-full object-cover rounded-xl group-hover/card:shadow-xl'
-                                    alt={certificate.altText}
-                                />
-                            </CardItem>
-                            <div className='flex justify-end items-center mt-10'>
-                                <CardItem
-                                    translateZ={20}
-                                    as='a'
-                                    href={`/certificate/${certificate.slug}`}
-                                    className='px-4 py-2 rounded-xl bg-black dark:bg-white dark:text-black text-white text-sm font-bold cursor-pointer'
-                                >
-                                    🔗 Open Shareable Link
-                                </CardItem>
-                            </div>
-                        </CardBody>
-                    </CardContainer>
+                    <CertificateCard
+                        key={index}
+                        certificate={certificate}
+                        index={index}
+                        onOpenModal={handleOpenModal}
+                    />
                 ))}
             </div>
 

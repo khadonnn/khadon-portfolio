@@ -24,7 +24,7 @@ import CertificateHoverMenu from "@/components/CertificateHoverMenu";
 
 export const metadata = {
     title: "Khadondev | Personal Portfolio",
-    description: "Khadon - Frontend Developer about Web application",
+    description: "Khadon - Full-Stack Developer",
 };
 
 export default function RootLayout({
