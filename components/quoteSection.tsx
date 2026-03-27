@@ -33,7 +33,7 @@ const QuoteSection = () => {
                     </span>
                 </blockquote>
 
-                <p className='mt-6 md:mt-8 text-lg md:text-xl text-gray-500 dark:text-gray-400 italic'>
+                <p className='mt-6 md:mt-8 text-lg md:text-xl text-gray-800 dark:text-gray-400 italic'>
                     — Linus Torvalds
                 </p>
             </div>

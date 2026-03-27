@@ -35,7 +35,7 @@ export default function About() {
                 , I pivoted to{" "}
                 <span className='font-semibold'>Full-stack Development</span>. I
                 love solving complex problems using
-                <span className='font-semibold text-blue-600'>
+                <span className='font-semibold text-gray-950 dark:text-blue-400'>
                     {" "}
                     React, Next.js, TypeScript, and MongoDB.
                 </span>

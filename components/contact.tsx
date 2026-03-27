@@ -8,10 +8,11 @@ import { sendEmail } from "@/actions/sendEmail";
 import SubmitBtn from "./submit-btn";
 import toast from "react-hot-toast";
 import { BackgroundBeams } from "./ui/background-beams";
+import { useIsDesktop } from "@/lib/useIsDesktop";
 
 export default function Contact() {
     const { ref } = useSectionInView("Contact");
-
+    const isDesktop = useIsDesktop();
     return (
         <motion.section
             id='contact'
@@ -31,12 +32,14 @@ export default function Contact() {
             }}
         >
             {/* Hiệu ứng background beams phủ full section */}
-            <div className='absolute inset-0 -z-20 pointer-events-none'>
-                <BackgroundBeams />
-            </div>
-            {/* Các background cũ vẫn giữ lại nếu muốn */}
-            <div className='bg-[#f9d2d2] absolute bottom-[8rem] -z-10 right-[11rem] h-[10.25rem] w-[10.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#bb5d83aa]'></div>
-            <div className='bg-[#d6aae4] absolute bottom-[8rem] -z-10 left-[-35rem] h-[10.25rem] w-[10rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#794aabb1]'></div>
+            {/* {isDesktop && (
+                <div className='absolute inset-0 -z-20 pointer-events-none'>
+                    <BackgroundBeams />
+                </div>
+            )} */}
+            {/* Các background cũ  */}
+            {/* <div className='bg-[#f9d2d2] absolute bottom-[8rem] -z-10 right-[11rem] h-[10.25rem] w-[10.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#bb5d83aa]'></div>
+            <div className='bg-[#d6aae4] absolute bottom-[8rem] -z-10 left-[-35rem] h-[10.25rem] w-[10rem] rounded-full blur-[10rem] sm:w-[60.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#794aabb1]'></div> */}
 
             {/* Nội dung form căn giữa trong container nhỏ */}
             <div className='w-full max-w-[38rem] mx-auto z-10'>

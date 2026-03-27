@@ -21,6 +21,7 @@ import Footer from "@/components/footer";
 import ThemeSwitch from "@/components/theme-switch";
 import BackgroundBlurs from "@/components/background-blurs";
 import CertificateHoverMenu from "@/components/CertificateHoverMenu";
+import GalaxyHero from "@/components/background/galaxy";
 
 export const metadata = {
     title: "Khadondev | Personal Portfolio",
@@ -41,6 +42,7 @@ export default function RootLayout({
                 <ThemeContextProvider>
                     <LoadingProvider>
                         <ActiveSectionContextProvider>
+                            <GalaxyHero />
                             <Header />
                             <div className='pt-28 sm:pt-36'>{children}</div>
                             <Footer />
