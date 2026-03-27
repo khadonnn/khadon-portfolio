@@ -35,7 +35,7 @@ export default function AntigravityWrapper() {
             ringRadius={6}
             waveSpeed={1.5}
             waveAmplitude={1}
-            particleSize={0.6}
+            particleSize={0.3}
             lerpSpeed={0.05}
             color='#80ffff'
             autoAnimate
