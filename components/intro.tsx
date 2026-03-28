@@ -169,7 +169,7 @@ const Intro = () => {
                         target='_blank'
                         rel='noopener noreferrer'
                     >
-                        <BsLinkedin />
+                        <BsLinkedin size={20} />
                     </a>
 
                     <a
@@ -178,7 +178,7 @@ const Intro = () => {
                         target='_blank'
                         rel='noopener noreferrer'
                     >
-                        <FaGithubSquare />
+                        <FaGithubSquare size={23} />
                     </a>
                 </div>
             </motion.div>

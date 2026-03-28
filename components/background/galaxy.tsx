@@ -24,9 +24,15 @@ function GalaxyHero() {
                     {/* Lớp Hạt Nhiễu (Noise) siêu nhẹ bằng SVG */}
                     {/* Dùng mix-blend-overlay để hạt nhiễu ám màu xuống lớp gradient bên dưới */}
                     <div
-                        className='absolute inset-0 w-full h-full opacity-[0.35] mix-blend-overlay pointer-events-none'
+                        className='absolute inset-0 pointer-events-none opacity-55 dark:opacity-40 mix-blend-multiply'
                         style={{
-                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                            backgroundImage: `url("data:image/svg+xml;utf8,%3Csvg width='420' height='420' viewBox='0 0 420 420' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='5' stitchTiles='stitch'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E")`,
+                            backgroundSize: "420px 420px",
+                            backgroundPosition: "center",
+                            maskImage:
+                                "radial-gradient(ellipse 95% 95% at 50% 50%, black 35%, transparent 85%)",
+                            WebkitMaskImage:
+                                "radial-gradient(ellipse 95% 95% at 50% 50%, black 35%, transparent 85%)",
                         }}
                     ></div>
                 </div>
@@ -44,7 +50,7 @@ function GalaxyHero() {
             )}
 
             {/* Lớp phủ chung: Giúp chữ ở Dark Mode dễ đọc hơn (Bỏ comment nếu cần) */}
-            {/* <div className='absolute inset-0 dark:bg-black/30 pointer-events-none transition-colors duration-700'></div> */}
+            <div className='absolute inset-0 dark:bg-black/5 pointer-events-none transition-colors duration-300'></div>
         </div>
     );
 }
