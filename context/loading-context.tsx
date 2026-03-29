@@ -52,6 +52,8 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
             return;
         }
 
+        setLoadProgress(0);
+
         const video = document.createElement("video") as HTMLVideoElement;
         videoRef.current = video;
         video.preload = "auto";
@@ -74,7 +76,8 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         const renderInterval = setInterval(() => {
             if (currentVal < targetVal) {
                 currentVal += 1;
-                setLoadProgress(currentVal);
+                // Keep progress monotonic even if effects overlap on slower devices.
+                setLoadProgress((prev) => Math.max(prev, currentVal));
             }
 
             // 3. Khi chạm 100%, kết thúc trơn tru
@@ -85,18 +88,22 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         }, 15);
 
         // Lắng nghe video xong thật thì chốt hạ lên 100
-        video.addEventListener("canplaythrough", () => {
+        const handleCanPlayThrough = () => {
             isVideoLoaded = true;
             clearInterval(fakeInterval);
             targetVal = 100;
-        });
+        };
 
-        video.addEventListener("error", () => {
+        const handleVideoError = () => {
             console.warn("Video load lỗi → Cho qua Loading luôn");
             isVideoLoaded = true;
             clearInterval(fakeInterval);
             targetVal = 100;
-        });
+            setLoadError(true);
+        };
+
+        video.addEventListener("canplaythrough", handleCanPlayThrough);
+        video.addEventListener("error", handleVideoError);
 
         video.src = videoSrc;
         video.load();
@@ -104,8 +111,8 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         return () => {
             clearInterval(fakeInterval);
             clearInterval(renderInterval);
-            video.removeEventListener("canplaythrough", () => {});
-            video.removeEventListener("error", () => {});
+            video.removeEventListener("canplaythrough", handleCanPlayThrough);
+            video.removeEventListener("error", handleVideoError);
         };
     }, [videoSrc, isCertificatePage]);
 
@@ -233,7 +240,13 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
                             </p>
                         </div>
                         <div className='loading-text-container text-center'>
-                            <h3 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-[-2px] uppercase'>
+                            <h3
+                                className={`relative inline-block text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-[-2px] uppercase ${
+                                    !loadError
+                                        ? "after:content-['...'] after:absolute after:left-full after:top-0 after:ml-1"
+                                        : ""
+                                }`}
+                            >
                                 {loadError ? "Ready!" : "Loading..."}
                             </h3>
                         </div>

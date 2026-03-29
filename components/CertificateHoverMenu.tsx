@@ -290,8 +290,82 @@ export default function CertificateHoverMenu() {
         });
     };
 
+    // Animate menu state (open/close) and hamburger icon
+    const animateMenuState = (open: boolean) => {
+        setIsMenuOpen(open);
+
+        gsap.to(menuContainerRef.current, {
+            x: open ? "0%" : "100%",
+            duration: 0.8,
+            ease: "power3.inOut",
+        });
+
+        const items =
+            containerRef.current?.querySelectorAll(".certificate-item");
+        if (items) {
+            if (open) {
+                gsap.to(items, {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.6,
+                    stagger: 0.08,
+                    ease: "power3.out",
+                    delay: 0.3,
+                });
+            } else {
+                gsap.to(items, {
+                    y: 30,
+                    opacity: 0,
+                    duration: 0.4,
+                    stagger: 0.05,
+                    ease: "power3.in",
+                });
+            }
+        }
+
+        if (open) {
+            gsap.to(hamburgerLine1Ref.current, {
+                rotation: 45,
+                y: 8,
+                duration: 0.3,
+                ease: "power2.inOut",
+            });
+            gsap.to(hamburgerLine2Ref.current, {
+                opacity: 0,
+                duration: 0.2,
+                ease: "power2.inOut",
+            });
+            gsap.to(hamburgerLine3Ref.current, {
+                rotation: -45,
+                y: -8,
+                duration: 0.3,
+                ease: "power2.inOut",
+            });
+        } else {
+            gsap.to(hamburgerLine1Ref.current, {
+                rotation: 0,
+                y: 0,
+                duration: 0.3,
+                ease: "power2.inOut",
+            });
+            gsap.to(hamburgerLine2Ref.current, {
+                opacity: 1,
+                duration: 0.2,
+                ease: "power2.inOut",
+            });
+            gsap.to(hamburgerLine3Ref.current, {
+                rotation: 0,
+                y: 0,
+                duration: 0.3,
+                ease: "power2.inOut",
+            });
+        }
+    };
+
     // Handle click
     const handleClick = (slug: string) => {
+        setIsMouseOverItem(false);
+        animateMenuState(false);
         router.push(`/certificate/${slug}`);
     };
 
@@ -334,81 +408,7 @@ export default function CertificateHoverMenu() {
     // Toggle menu với hamburger animation
     const toggleMenu = () => {
         const newState = !isMenuOpen;
-        setIsMenuOpen(newState);
-
-        // Animate menu container
-        gsap.to(menuContainerRef.current, {
-            x: newState ? "0%" : "100%",
-            duration: 0.8,
-            ease: "power3.inOut",
-        });
-
-        // Animate certificate items với stagger effect
-        const items =
-            containerRef.current?.querySelectorAll(".certificate-item");
-        if (items) {
-            if (newState) {
-                // Mở menu: items trượt lên từ dưới
-                gsap.to(items, {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.6,
-                    stagger: 0.08, // Mỗi item cách nhau 0.08s
-                    ease: "power3.out",
-                    delay: 0.3, // Delay sau khi menu đã slide vào
-                });
-            } else {
-                // Đóng menu: items trượt xuống
-                gsap.to(items, {
-                    y: 30,
-                    opacity: 0,
-                    duration: 0.4,
-                    stagger: 0.05,
-                    ease: "power3.in",
-                });
-            }
-        }
-
-        // Animate hamburger thành X
-        if (newState) {
-            // Biến thành X
-            gsap.to(hamburgerLine1Ref.current, {
-                rotation: 45,
-                y: 8,
-                duration: 0.3,
-                ease: "power2.inOut",
-            });
-            gsap.to(hamburgerLine2Ref.current, {
-                opacity: 0,
-                duration: 0.2,
-                ease: "power2.inOut",
-            });
-            gsap.to(hamburgerLine3Ref.current, {
-                rotation: -45,
-                y: -8,
-                duration: 0.3,
-                ease: "power2.inOut",
-            });
-        } else {
-            // Trở về hamburger
-            gsap.to(hamburgerLine1Ref.current, {
-                rotation: 0,
-                y: 0,
-                duration: 0.3,
-                ease: "power2.inOut",
-            });
-            gsap.to(hamburgerLine2Ref.current, {
-                opacity: 1,
-                duration: 0.2,
-                ease: "power2.inOut",
-            });
-            gsap.to(hamburgerLine3Ref.current, {
-                rotation: 0,
-                y: 0,
-                duration: 0.3,
-                ease: "power2.inOut",
-            });
-        }
+        animateMenuState(newState);
     };
 
     // Chỉ hiện menu khi ở trang certificate
