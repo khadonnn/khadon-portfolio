@@ -1,7 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    ReactNode,
+    useRef,
+} from "react";
 import { usePathname } from "next/navigation";
+import { gsap } from "gsap";
+import SplitType from "split-type";
 
 type LoadingContextType = {
     isReady: boolean;
@@ -14,15 +23,173 @@ type LoadingContextType = {
 
 const LoadingContext = createContext<LoadingContextType | null>(null);
 
-export function LoadingProvider({ children }: { children: ReactNode }) {
+interface LoadingProviderProps {
+    children: ReactNode;
+    videoSrc?: string;
+}
+
+export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
     const [isReady, setIsReady] = useState(false);
     const [loadProgress, setLoadProgress] = useState(0);
     const [loadError, setLoadError] = useState(false);
-    const pathname = usePathname();
+    const [isUnmounted, setIsUnmounted] = useState(false);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
 
-    // Skip loading screen for certificate pages
+    const pathname = usePathname();
     const isCertificatePage = pathname?.startsWith("/certificate/");
-    const shouldShowLoading = !isCertificatePage && !isReady;
+
+    useEffect(() => {
+        if (isCertificatePage) {
+            setIsReady(true);
+            setIsUnmounted(true);
+        }
+    }, [isCertificatePage]);
+
+    // ====================== TIẾN TRÌNH THÔNG MINH (CHỐNG GIẬT LÙI) ======================
+    useEffect(() => {
+        if (!videoSrc || isCertificatePage) {
+            if (!isCertificatePage) setIsReady(true);
+            return;
+        }
+
+        const video = document.createElement("video") as HTMLVideoElement;
+        videoRef.current = video;
+        video.preload = "auto";
+        video.muted = true;
+        video.playsInline = true;
+
+        let currentVal = 0;
+        let targetVal = 0;
+        let isVideoLoaded = false;
+
+        // 1. Target tăng ngẫu nhiên nhưng cực mượt lên tối đa 90%
+        const fakeInterval = setInterval(() => {
+            if (targetVal < 90 && !isVideoLoaded) {
+                targetVal += Math.floor(Math.random() * 8) + 2;
+                if (targetVal > 90) targetVal = 90;
+            }
+        }, 150);
+
+        // 2. Con số hiển thị luôn đuổi theo target từng 1% (chống chớp số)
+        const renderInterval = setInterval(() => {
+            if (currentVal < targetVal) {
+                currentVal += 1;
+                setLoadProgress(currentVal);
+            }
+
+            // 3. Khi chạm 100%, kết thúc trơn tru
+            if (currentVal >= 100) {
+                clearInterval(renderInterval);
+                setTimeout(() => setIsReady(true), 200);
+            }
+        }, 15);
+
+        // Lắng nghe video xong thật thì chốt hạ lên 100
+        video.addEventListener("canplaythrough", () => {
+            isVideoLoaded = true;
+            clearInterval(fakeInterval);
+            targetVal = 100;
+        });
+
+        video.addEventListener("error", () => {
+            console.warn("Video load lỗi → Cho qua Loading luôn");
+            isVideoLoaded = true;
+            clearInterval(fakeInterval);
+            targetVal = 100;
+        });
+
+        video.src = videoSrc;
+        video.load();
+
+        return () => {
+            clearInterval(fakeInterval);
+            clearInterval(renderInterval);
+            video.removeEventListener("canplaythrough", () => {});
+            video.removeEventListener("error", () => {});
+        };
+    }, [videoSrc, isCertificatePage]);
+
+    // ====================== GSAP ANIMATION ======================
+    useEffect(() => {
+        if (!isReady || isCertificatePage) return;
+
+        const loadingScreen = document.querySelector(
+            ".global-loading-screen",
+        ) as HTMLElement;
+        if (!loadingScreen) return;
+
+        const ctx = gsap.context(() => {
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    setIsUnmounted(true);
+                },
+            });
+
+            tl.to([".loading-spinner", ".progress-container"], {
+                opacity: 0,
+                scale: 0.85,
+                y: -30,
+                duration: 0.6,
+                ease: "power2.out",
+            });
+
+            const loadingText = document.querySelector(
+                ".loading-text-container",
+            ) as HTMLElement;
+            if (loadingText) {
+                const split = new SplitType(loadingText, { types: "chars" });
+                if (split.chars) {
+                    tl.fromTo(
+                        split.chars,
+                        { y: 0, opacity: 1, filter: "blur(0px)" },
+                        {
+                            y: (i) => (i < split.chars!.length / 2 ? -70 : 70),
+                            opacity: 0,
+                            filter: "blur(10px)",
+                            stagger: 0.03,
+                            duration: 0.8,
+                            ease: "expo.inOut",
+                        },
+                        "-=0.3",
+                    );
+                    tl.to(
+                        split.chars,
+                        {
+                            x: (i) =>
+                                i < split.chars!.length / 2 ? -200 : 200,
+                            scale: 0.5,
+                            opacity: 0,
+                            duration: 0.7,
+                            stagger: 0.02,
+                            ease: "power3.in",
+                        },
+                        "-=0.4",
+                    );
+                }
+            }
+
+            tl.to(
+                loadingScreen,
+                { opacity: 0, scale: 0.98, duration: 0.9, ease: "power3.out" },
+                "-=0.5",
+            );
+
+            const mainContent = document.querySelector(
+                ".main-content-wrapper",
+            ) as HTMLElement;
+            if (mainContent) {
+                // ĐÃ FIX: Gỡ bỏ y: 80 để không làm hỏng các nút position: fixed (như Theme Switch)
+                tl.fromTo(
+                    mainContent,
+                    { autoAlpha: 0 },
+                    { autoAlpha: 1, duration: 1.2, ease: "power2.out" },
+                    "-=0.6",
+                );
+            }
+        });
+
+        return () => ctx.revert();
+    }, [isReady, isCertificatePage]);
 
     return (
         <LoadingContext.Provider
@@ -35,35 +202,40 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
                 setLoadError,
             }}
         >
-            {/* Hide all content when loading (except certificate pages) */}
+            {/* Lớp bọc an toàn */}
             <div
-                style={{ visibility: shouldShowLoading ? "hidden" : "visible" }}
+                className={`main-content-wrapper w-full min-h-screen relative z-10 ${
+                    isCertificatePage || isUnmounted
+                        ? "opacity-100 visible"
+                        : "opacity-0 invisible"
+                }`}
             >
                 {children}
             </div>
 
-            {/* GLOBAL LOADING SCREEN */}
-            {shouldShowLoading && (
-                <div className='fixed inset-0 z-[99999] flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-opacity duration-700'>
-                    <div className='flex flex-col items-center gap-6 p-8'>
-                        <div className='relative w-20 h-20'>
-                            <div className='absolute inset-0 rounded-full border-4 border-gray-200 dark:border-gray-700'></div>
-                            <div className='absolute inset-0 rounded-full border-4 border-t-pink-500 animate-spin'></div>
+            {/* Màn hình Loading */}
+            {!isUnmounted && (
+                <div className='global-loading-screen fixed inset-0 z-[99999] flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-700'>
+                    <div className='flex flex-col items-center gap-10'>
+                        <div className='loading-spinner relative w-20 h-20'>
+                            <div className='absolute inset-0 rounded-full border-4 border-gray-200 dark:border-gray-700' />
+                            <div className='absolute inset-0 rounded-full border-4 border-t-pink-500 animate-spin' />
                         </div>
-
-                        <div className='text-center'>
-                            <h3 className='text-xl font-bold text-gray-800 dark:text-white mb-2'>
-                                {loadError ? "Ready!" : "Loading..."}
-                            </h3>
-                            <div className='w-64 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-4'>
+                        <div className='progress-container w-64'>
+                            <div className='h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
                                 <div
-                                    className='h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-300'
+                                    className='h-full bg-gradient-to-r from-pink-500 via-purple-500 to-violet-500 transition-all duration-100'
                                     style={{ width: `${loadProgress}%` }}
-                                ></div>
+                                />
                             </div>
-                            <p className='text-xs text-gray-500 dark:text-gray-400 mt-2'>
+                            <p className='text-center text-xs text-gray-500 dark:text-gray-400 mt-2 font-mono'>
                                 {loadProgress}%
                             </p>
+                        </div>
+                        <div className='loading-text-container text-center'>
+                            <h3 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-[-2px] uppercase'>
+                                {loadError ? "Ready!" : "Loading..."}
+                            </h3>
                         </div>
                     </div>
                 </div>
@@ -75,7 +247,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
 export function useLoading() {
     const context = useContext(LoadingContext);
     if (!context) {
-        throw new Error("useLoading must be used within LoadingProvider");
+        throw new Error("useLoading must be used within a LoadingProvider");
     }
     return context;
 }
