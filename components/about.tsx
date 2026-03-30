@@ -1,75 +1,227 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useRef } from "react";
 
-import { motion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SectionHeading from "@/components/section-heading";
 import { useSectionInView } from "@/lib/hooks";
 import { ScrollAnimatedTooltip } from "@/components/ui/scroll-animated-tooltip";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
 export default function About() {
-    const { ref } = useSectionInView("About");
+    const sectionRef = useRef<HTMLElement | null>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLDivElement>(null);
+    const imageRef = useRef<HTMLDivElement>(null);
+    const imageCardRef = useRef<HTMLDivElement>(null);
+    const { ref: inViewRef } = useSectionInView("About", 0.5);
+
+    const setSectionRefs = useCallback(
+        (node: HTMLElement | null) => {
+            sectionRef.current = node;
+            inViewRef(node);
+        },
+        [inViewRef],
+    );
+
+    useGSAP(
+        () => {
+            if (
+                !panelRef.current ||
+                !textRef.current ||
+                !imageRef.current ||
+                !imageCardRef.current ||
+                !sectionRef.current
+            ) {
+                return;
+            }
+
+            const copyLines = textRef.current.querySelectorAll(".about-copy");
+
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                gsap.set(
+                    [panelRef.current, textRef.current, imageRef.current],
+                    {
+                        clearProps: "all",
+                        autoAlpha: 1,
+                    },
+                );
+                gsap.set([copyLines, imageCardRef.current], {
+                    clearProps: "all",
+                });
+                return;
+            }
+
+            const tl = gsap.timeline({
+                paused: true,
+                defaults: {
+                    ease: "power3.out",
+                },
+            });
+
+            tl.fromTo(
+                panelRef.current,
+                {
+                    autoAlpha: 0,
+                    y: 34,
+                    clipPath: "inset(8% 0% 14% 0% round 24px)",
+                },
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    clipPath: "inset(0% 0% 0% 0% round 16px)",
+                    duration: 1.05,
+                },
+                0,
+            )
+                .fromTo(
+                    copyLines,
+                    {
+                        autoAlpha: 0,
+                        yPercent: 70,
+                        rotateX: 12,
+                        filter: "blur(6px)",
+                        transformOrigin: "50% 100%",
+                    },
+                    {
+                        autoAlpha: 1,
+                        yPercent: 0,
+                        rotateX: 0,
+                        filter: "blur(0px)",
+                        duration: 0.95,
+                        stagger: 0.14,
+                    },
+                    0.24,
+                )
+                .fromTo(
+                    imageRef.current,
+                    {
+                        autoAlpha: 0,
+                        xPercent: 12,
+                        rotateY: -8,
+                    },
+                    {
+                        autoAlpha: 1,
+                        xPercent: 0,
+                        rotateY: 0,
+                        duration: 1.15,
+                    },
+                    0.18,
+                )
+                .fromTo(
+                    imageCardRef.current,
+                    {
+                        clipPath: "inset(18% 10% 18% 10% round 20px)",
+                        scale: 0.9,
+                    },
+                    {
+                        clipPath: "inset(0% 0% 0% 0% round 12px)",
+                        scale: 1,
+                        duration: 1.1,
+                    },
+                    0.12,
+                );
+
+            const entranceTrigger = ScrollTrigger.create({
+                trigger: sectionRef.current,
+                start: "top 86%",
+                end: "bottom 20%",
+                invalidateOnRefresh: true,
+                onEnter: () => tl.play(),
+                onEnterBack: () => tl.play(),
+                onLeaveBack: () => tl.progress(0).pause(),
+            });
+
+            ScrollTrigger.refresh();
+
+            return () => {
+                entranceTrigger.kill();
+                tl.kill();
+            };
+        },
+        { scope: sectionRef },
+    );
+
     return (
-        <motion.section
+        <section
+            ref={setSectionRefs}
             className='mb-28 max-w-[65rem] leading-8 sm:mb-28 scroll-mt-28'
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.175 }}
             id='about'
-            ref={ref}
         >
             <SectionHeading>About Me</SectionHeading>
-            <div className='rounded-xl border border-black/10 bg-white/70 p-6 shadow-lg backdrop-blur-sm dark:border-white/15 dark:bg-white/10 md:p-8'>
+            <div
+                ref={panelRef}
+                className='rounded-2xl border border-black/[0.08] bg-gradient-to-br from-white/85 via-white/70 to-white/45 p-6 shadow-[0_36px_80px_-34px_rgba(0,0,0,0.55)] backdrop-blur-md dark:border-white/15 dark:from-white/12 dark:via-white/8 dark:to-white/5 md:p-8'
+            >
                 <div className='grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center'>
-                    <div className='text-left'>
-                        <div className='mb-4 text-lg leading-relaxed text-gray-800 dark:text-gray-100'>
-                            After a degree in{" "}
-                            <ScrollAnimatedTooltip content={<FirstDegree />}>
-                                <b className='underline font-semibold'>
-                                    Business Administration
-                                </b>
-                            </ScrollAnimatedTooltip>{" "}
-                            at{" "}
-                            <ScrollAnimatedTooltip
-                                containerClassName='underline'
-                                content={<TDTCard />}
-                            >
-                                <b className='underline'>TDTU</b>
-                            </ScrollAnimatedTooltip>
-                            , I pivoted to{" "}
-                            <span className='font-semibold'>
-                                Full-stack Development
-                            </span>
-                            . I love solving complex problems using
-                            <span className='font-semibold text-gray-950 dark:text-blue-300'>
-                                {" "}
-                                React, Next.js, TypeScript, and MongoDB.
-                            </span>
+                    <div
+                        ref={textRef}
+                        className='relative z-20 overflow-visible text-left will-change-transform will-change-opacity'
+                    >
+                        <div className='about-copy-wrap mb-4'>
+                            <div className='about-copy text-lg leading-relaxed text-gray-800 dark:text-gray-100'>
+                                After a degree in{" "}
+                                <ScrollAnimatedTooltip
+                                    content={<FirstDegree />}
+                                >
+                                    <b className='underline font-semibold'>
+                                        Business Administration
+                                    </b>
+                                </ScrollAnimatedTooltip>{" "}
+                                at{" "}
+                                <ScrollAnimatedTooltip
+                                    containerClassName='relative z-[1200] underline'
+                                    content={<TDTCard />}
+                                >
+                                    <b className='underline'>TDTU</b>
+                                </ScrollAnimatedTooltip>
+                                , I pivoted to{" "}
+                                <span className='font-semibold'>
+                                    Full-stack Development
+                                </span>
+                                . I love solving complex problems using
+                                <span className='font-semibold text-gray-950 dark:text-blue-300'>
+                                    {" "}
+                                    React, Next.js, TypeScript, and MongoDB.
+                                </span>
+                            </div>
                         </div>
 
-                        <div className='text-lg leading-relaxed text-gray-800 dark:text-gray-100'>
-                            Coding{" "}
-                            <span className='italic font-medium'>
-                                8+ hours daily
-                            </span>
-                            , I am now pursuing a{" "}
-                            <span className='underline font-medium'>
-                                Second Degree
-                            </span>{" "}
-                            at{" "}
-                            <ScrollAnimatedTooltip content={<UITCard />}>
-                                <b className='underline'>UIT</b>
-                            </ScrollAnimatedTooltip>{" "}
-                            to deepen my expertise. I am seeking a
-                            <span className='font-bold'>
-                                {" "}
-                                full-time software developer{" "}
-                            </span>{" "}
-                            role to contribute and grow.
+                        <div className='about-copy-wrap'>
+                            <div className='about-copy text-lg leading-relaxed text-gray-800 dark:text-gray-100'>
+                                Coding{" "}
+                                <span className='italic font-medium'>
+                                    8+ hours daily
+                                </span>
+                                , I am now pursuing a{" "}
+                                <span className='underline font-medium'>
+                                    Second Degree
+                                </span>{" "}
+                                at{" "}
+                                <ScrollAnimatedTooltip content={<UITCard />}>
+                                    <b className='underline'>UIT</b>
+                                </ScrollAnimatedTooltip>{" "}
+                                to deepen my expertise. I am seeking a
+                                <span className='font-bold'>
+                                    {" "}
+                                    full-time software developer{" "}
+                                </span>{" "}
+                                role to contribute and grow.
+                            </div>
                         </div>
                     </div>
 
-                    <div className='flex justify-center md:justify-end'>
-                        <div className='relative h-[460px] w-full max-w-[320px] md:h-[300px] md:max-w-[420px] shadow-md rounded-xl'>
+                    <div
+                        ref={imageRef}
+                        className='relative z-10 flex justify-center md:justify-end will-change-transform will-change-opacity'
+                    >
+                        <div
+                            ref={imageCardRef}
+                            className='relative h-[460px] w-full max-w-[320px] overflow-hidden shadow-md rounded-xl md:h-[300px] md:max-w-[420px]'
+                        >
                             <img
                                 src='/assets/about/about.jpg'
                                 alt='About me'
@@ -87,7 +239,7 @@ export default function About() {
                     </div>
                 </div>
             </div>
-        </motion.section>
+        </section>
     );
 }
 const TDTCard = () => {

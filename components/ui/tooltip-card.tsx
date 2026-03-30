@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -27,8 +28,21 @@ export const Tooltip = ({
         x: 0,
         y: 0,
     });
+    const [isMounted, setIsMounted] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
+    const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        setIsMounted(true);
+
+        return () => {
+            if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (!isVisible || !contentRef.current) return;
@@ -55,21 +69,21 @@ export const Tooltip = ({
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const tooltipWidth = 240;
+        const tooltipWidth = tooltip.offsetWidth || 220;
         const tooltipHeight = tooltip.scrollHeight;
 
         const absoluteX = containerRect.left + mouseX;
         const absoluteY = containerRect.top + mouseY;
 
-        let finalX = mouseX + 12;
-        let finalY = mouseY + 12;
+        let finalX = absoluteX + 12;
+        let finalY = absoluteY + 12;
 
-        if (absoluteX + 12 + tooltipWidth > viewportWidth)
-            finalX = mouseX - tooltipWidth - 12;
-        if (absoluteX + finalX < 0) finalX = -containerRect.left + 12;
-        if (absoluteY + 12 + tooltipHeight > viewportHeight)
-            finalY = mouseY - tooltipHeight - 12;
-        if (absoluteY + finalY < 0) finalY = -containerRect.top + 12;
+        if (finalX + tooltipWidth > viewportWidth)
+            finalX = absoluteX - tooltipWidth - 12;
+        if (finalX < 0) finalX = 12;
+        if (finalY + tooltipHeight > viewportHeight)
+            finalY = absoluteY - tooltipHeight - 12;
+        if (finalY < 0) finalY = 12;
 
         return { x: finalX, y: finalY };
     };
@@ -81,6 +95,9 @@ export const Tooltip = ({
     };
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+        }
         setIsVisible(true);
         const rect = e.currentTarget.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
@@ -89,9 +106,11 @@ export const Tooltip = ({
     };
 
     const handleMouseLeave = () => {
-        setMouse({ x: 0, y: 0 });
-        setPosition({ x: 0, y: 0 });
-        setIsVisible(false);
+        hideTimeoutRef.current = setTimeout(() => {
+            setMouse({ x: 0, y: 0 });
+            setPosition({ x: 0, y: 0 });
+            setIsVisible(false);
+        }, 80);
     };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -100,23 +119,6 @@ export const Tooltip = ({
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         updateMousePosition(mouseX, mouseY);
-    };
-
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        const touch = e.touches[0];
-        const rect = e.currentTarget.getBoundingClientRect();
-        const mouseX = touch.clientX - rect.left;
-        const mouseY = touch.clientY - rect.top;
-        updateMousePosition(mouseX, mouseY);
-        setIsVisible(true);
-    };
-
-    const handleTouchEnd = () => {
-        setTimeout(() => {
-            setIsVisible(false);
-            setMouse({ x: 0, y: 0 });
-            setPosition({ x: 0, y: 0 });
-        }, 2000);
     };
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -137,6 +139,31 @@ export const Tooltip = ({
     };
 
     useEffect(() => {
+        if (!isVisible || !isMounted) return;
+
+        const handleOutsidePointerDown = (event: PointerEvent) => {
+            const target = event.target as Node;
+            const clickedTrigger = containerRef.current?.contains(target);
+            const clickedTooltip = tooltipRef.current?.contains(target);
+
+            if (!clickedTrigger && !clickedTooltip) {
+                setIsVisible(false);
+                setMouse({ x: 0, y: 0 });
+                setPosition({ x: 0, y: 0 });
+            }
+        };
+
+        document.addEventListener("pointerdown", handleOutsidePointerDown);
+
+        return () => {
+            document.removeEventListener(
+                "pointerdown",
+                handleOutsidePointerDown,
+            );
+        };
+    }, [isVisible, isMounted]);
+
+    useEffect(() => {
         if (isVisible && contentRef.current) {
             const newPosition = calculatePosition(mouse.x, mouse.y);
             setPosition(newPosition);
@@ -154,49 +181,59 @@ export const Tooltip = ({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onMouseMove={handleMouseMove}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
             onClick={handleClick}
         >
             {children}
-            <AnimatePresence>
-                {isVisible && (
-                    <motion.div
-                        key={String(isVisible)}
-                        initial={{ height: 0, opacity: 1 }}
-                        animate={{ height, opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 20,
-                        }}
-                        className='absolute z-50 min-w-[15rem] overflow-hidden rounded-md border border-transparent bg-white shadow-sm ring-1 shadow-black/5 ring-black/5 dark:bg-neutral-900 dark:shadow-white/10 dark:ring-white/5'
-                        style={{ top: position.y, left: position.x }}
-                        onMouseEnter={() => setIsVisible(true)}
-                        onMouseLeave={() => setIsVisible(false)}
-                    >
-                        <div
-                            ref={contentRef}
-                            className='relative p-2 text-sm text-neutral-600 md:p-4 dark:text-neutral-400'
-                        >
-                            {onClose && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onClose();
-                                    }}
-                                    className='absolute right-2 top-2 z-50 rounded-sm bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/10'
-                                    aria-label='Close tooltip'
+            {isMounted &&
+                createPortal(
+                    <AnimatePresence>
+                        {isVisible && (
+                            <motion.div
+                                ref={tooltipRef}
+                                key={String(isVisible)}
+                                initial={{ height: 0, opacity: 1 }}
+                                animate={{ height, opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 200,
+                                    damping: 20,
+                                }}
+                                className='fixed z-[99999] w-max min-w-[11rem] max-w-[14rem] overflow-hidden rounded-md border border-transparent bg-white shadow-sm ring-1 shadow-black/5 ring-black/5 dark:bg-neutral-900 dark:shadow-white/10 dark:ring-white/5 md:max-w-[16rem]'
+                                style={{ top: position.y, left: position.x }}
+                                onMouseEnter={() => {
+                                    if (hideTimeoutRef.current) {
+                                        clearTimeout(hideTimeoutRef.current);
+                                    }
+                                    setIsVisible(true);
+                                }}
+                                onMouseLeave={() => {
+                                    setIsVisible(false);
+                                }}
+                            >
+                                <div
+                                    ref={contentRef}
+                                    className='relative p-2 text-xs text-neutral-600 md:p-3 md:text-sm dark:text-neutral-400'
                                 >
-                                    ×
-                                </button>
-                            )}
-                            {content}
-                        </div>
-                    </motion.div>
+                                    {onClose && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onClose();
+                                            }}
+                                            className='absolute right-2 top-2 z-50 rounded-sm bg-black/10 px-1.5 py-0.5 text-xs dark:bg-white/10'
+                                            aria-label='Close tooltip'
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                    {content}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>,
+                    document.body,
                 )}
-            </AnimatePresence>
         </div>
     );
 };
