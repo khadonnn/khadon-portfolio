@@ -21,6 +21,7 @@ interface Certificate {
 // Small wrapper component that mounts portal content only after client mount
 function PortalMountControl({
     isMenuOpen,
+    supportsHover,
     buttonRef,
     hamburgerLine1Ref,
     hamburgerLine2Ref,
@@ -43,9 +44,13 @@ function PortalMountControl({
             <button
                 ref={buttonRef}
                 onClick={toggleMenu}
-                onMouseEnter={handleButtonMouseEnter}
-                onMouseLeave={handleButtonMouseLeave}
-                className={`pointer-events-auto w-14 h-14 bg-white/5 dark:bg-white/6 border-2 border-white/10 hover:border-white/20 rounded-full shadow-lg flex flex-col items-center justify-center gap-1.5 transition-all duration-300 group relative overflow-hidden ${
+                onMouseEnter={
+                    supportsHover ? handleButtonMouseEnter : undefined
+                }
+                onMouseLeave={
+                    supportsHover ? handleButtonMouseLeave : undefined
+                }
+                className={`pointer-events-auto w-14 h-14 bg-white/5 dark:bg-white/6 border-2 border-gray-500/5 ${supportsHover ? "hover:border-white/20" : ""} rounded-full shadow-lg flex flex-col items-center justify-center gap-1.5 transition-all duration-300 group relative overflow-hidden ${
                     isMenuOpen ? "ring-4 ring-blue-500" : ""
                 }`}
                 style={{
@@ -65,15 +70,15 @@ function PortalMountControl({
                 />
                 <div
                     ref={hamburgerLine1Ref}
-                    className='w-6 h-0.5 bg-white/90 rounded-full transition-all relative z-10'
+                    className='w-6 h-0.5 bg-black/80 dark:bg-white/90 rounded-full transition-all relative z-10'
                 />
                 <div
                     ref={hamburgerLine2Ref}
-                    className='w-6 h-0.5 bg-white/70 rounded-full transition-all relative z-10'
+                    className='w-6 h-0.5 bg-black/60 dark:bg-white/70 rounded-full transition-all relative z-10'
                 />
                 <div
                     ref={hamburgerLine3Ref}
-                    className='w-6 h-0.5 bg-white/90 rounded-full transition-all relative z-10'
+                    className='w-6 h-0.5 bg-black/80 dark:bg-white/90 rounded-full transition-all relative z-10'
                 />
             </button>
 
@@ -115,6 +120,7 @@ export default function CertificateHoverMenu() {
     const [activeIndex, setActiveIndex] = useState<number>(0);
     const [isMouseOverItem, setIsMouseOverItem] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [supportsHover, setSupportsHover] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -156,6 +162,32 @@ export default function CertificateHoverMenu() {
         },
         { scope: containerRef },
     );
+
+    useEffect(() => {
+        if (typeof window === "undefined" || !window.matchMedia) return;
+
+        const mediaQuery = window.matchMedia(
+            "(hover: hover) and (pointer: fine)",
+        );
+
+        const updateHoverSupport = () => {
+            setSupportsHover(mediaQuery.matches);
+        };
+
+        updateHoverSupport();
+
+        if (typeof mediaQuery.addEventListener === "function") {
+            mediaQuery.addEventListener("change", updateHoverSupport);
+            return () => {
+                mediaQuery.removeEventListener("change", updateHoverSupport);
+            };
+        }
+
+        mediaQuery.addListener(updateHoverSupport);
+        return () => {
+            mediaQuery.removeListener(updateHoverSupport);
+        };
+    }, []);
 
     // Get variant for each certificate
     const getVariant = (
@@ -253,7 +285,7 @@ export default function CertificateHoverMenu() {
     // Xử lý khi hover vào
     const handleMouseEnter = (certificate: Certificate, index: number) => {
         // Chỉ hiện preview khi menu đang mở
-        if (!isMenuOpen) return;
+        if (!isMenuOpen || !supportsHover) return;
 
         setIsMouseOverItem(true);
         const variant = getVariant(index);
@@ -269,6 +301,8 @@ export default function CertificateHoverMenu() {
 
     // Xử lý khi hover ra
     const handleMouseLeave = () => {
+        if (!supportsHover) return;
+
         setIsMouseOverItem(false);
         const variant = getVariant(activeIndex);
 
@@ -426,6 +460,7 @@ export default function CertificateHoverMenu() {
             {typeof document !== "undefined" && (
                 <PortalMountControl
                     isMenuOpen={isMenuOpen}
+                    supportsHover={supportsHover}
                     buttonRef={buttonRef}
                     hamburgerLine1Ref={hamburgerLine1Ref}
                     hamburgerLine2Ref={hamburgerLine2Ref}
@@ -540,12 +575,24 @@ export default function CertificateHoverMenu() {
                                     className={`certificate-item group relative border-b border-white/10 py-5 px-4 cursor-pointer transition-all duration-300 ${
                                         isActive
                                             ? "bg-white/10"
-                                            : "hover:bg-white/5"
+                                            : supportsHover
+                                              ? "hover:bg-white/5"
+                                              : ""
                                     }`}
-                                    onMouseEnter={() =>
-                                        handleMouseEnter(certificate, index)
+                                    onMouseEnter={
+                                        supportsHover
+                                            ? () =>
+                                                  handleMouseEnter(
+                                                      certificate,
+                                                      index,
+                                                  )
+                                            : undefined
                                     }
-                                    onMouseLeave={handleMouseLeave}
+                                    onMouseLeave={
+                                        supportsHover
+                                            ? handleMouseLeave
+                                            : undefined
+                                    }
                                     onClick={() =>
                                         handleClick(certificate.slug)
                                     }
@@ -561,15 +608,21 @@ export default function CertificateHoverMenu() {
 
                                     {/* Number */}
                                     <div className='flex items-start gap-4'>
-                                        <span className='text-white/40 text-sm font-mono mt-1 group-hover:text-white/60 transition-colors'>
+                                        <span
+                                            className={`text-white/40 text-sm font-mono mt-1 transition-colors ${supportsHover ? "group-hover:text-white/60" : ""}`}
+                                        >
                                             {String(index + 1).padStart(2, "0")}
                                         </span>
 
                                         <div className='flex-1'>
-                                            <h4 className='text-white text-lg font-semibold mb-1 group-hover:text-blue-400 transition-colors line-clamp-2'>
+                                            <h4
+                                                className={`text-white text-lg font-semibold mb-1 transition-colors line-clamp-2 ${supportsHover ? "group-hover:text-blue-400" : ""}`}
+                                            >
                                                 {certificate.title}
                                             </h4>
-                                            <p className='text-white/50 text-sm line-clamp-2 group-hover:text-white/70 transition-colors'>
+                                            <p
+                                                className={`text-white/50 text-sm line-clamp-2 transition-colors ${supportsHover ? "group-hover:text-white/70" : ""}`}
+                                            >
                                                 {certificate.description}
                                             </p>
                                         </div>
@@ -579,7 +632,9 @@ export default function CertificateHoverMenu() {
                                             className={`w-5 h-5 text-white/40 transition-all duration-300 ${
                                                 isActive
                                                     ? "translate-x-1 text-blue-400"
-                                                    : "group-hover:translate-x-1 group-hover:text-white/60"
+                                                    : supportsHover
+                                                      ? "group-hover:translate-x-1 group-hover:text-white/60"
+                                                      : ""
                                             }`}
                                             fill='none'
                                             viewBox='0 0 24 24'
@@ -601,7 +656,9 @@ export default function CertificateHoverMenu() {
                     {/* Footer info */}
                     <div className='mt-8 pt-4 border-t border-white/20'>
                         <p className='text-white/40 text-xs'>
-                            Hover to preview • Click to view full certificate
+                            {supportsHover
+                                ? "Hover to preview • Click to view full certificate"
+                                : "Tap to view full certificate"}
                         </p>
                     </div>
                 </div>
