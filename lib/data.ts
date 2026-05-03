@@ -8,7 +8,7 @@ import pern_store from "@/public/pern_store.png";
 import kblog from "@/public/kblog.png";
 import chatMee from "@/public/chat-mee.png";
 import store_shop from "@/public/store_shop.png";
-
+import liveCode from "@/public/live-code.png";
 export const links = [
     {
         name: "Home",
@@ -112,6 +112,23 @@ export const certificates = [
 ] as const;
 export const projectsData = [
     {
+        title: "Live-Code Platform",
+        description:
+            "A full-stack real-time technical interview platform with video calling, code editor, and collaborative features.",
+        tags: [
+            "MERN",
+            "Node.js",
+            "Clerk",
+            "Stream",
+            "Inngest",
+            "Docker",
+            "Piston API",
+            "Monaco Editor",
+        ],
+        imageUrl: liveCode,
+        url: "https://github.com/khadonnn/live-code",
+    },
+    {
         title: "ChatMEE",
         description:
             "A real-time messaging application built with Socket.IO, featuring the following pages: Login, Register, Home, Settings, Profile, and Discover.",
@@ -142,14 +159,7 @@ export const projectsData = [
         imageUrl: pern_store,
         url: "https://pern-store-fs5d.onrender.com/",
     },
-    // {
-    //     title: "Chit Chat",
-    //     description:
-    //         "This is a chat app offering real-time messaging, file sharing, and seamless communication for everyone.",
-    //     tags: ["React", "Firebase", "Tailwind", "Antd"],
-    //     imageUrl: chat_app,
-    //     url: "https://chitchat-khadon.vercel.app/",
-    // },
+
     {
         title: "Store Shop",
         description:
@@ -177,7 +187,14 @@ export const projectsData = [
         url: "https://k-blog-theta.vercel.app/",
     },
 ] as const;
-
+// {
+//     title: "Chit Chat",
+//     description:
+//         "This is a chat app offering real-time messaging, file sharing, and seamless communication for everyone.",
+//     tags: ["React", "Firebase", "Tailwind", "Antd"],
+//     imageUrl: chat_app,
+//     url: "https://chitchat-khadon.vercel.app/",
+// },
 export const skillsData = [
     "HTML",
     "CSS",

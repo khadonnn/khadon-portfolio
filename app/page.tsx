@@ -14,6 +14,7 @@ import QuoteSection from "@/components/quoteSection";
 import Antigravity from "@/components/Antigravity";
 import { useIsDesktop } from "@/lib/useIsDesktop";
 import GalaxyHero from "@/components/background/galaxy";
+import MapLayout from "@/components/map-layout";
 
 export default function Home() {
     const isDesktop = useIsDesktop();
@@ -34,6 +35,7 @@ export default function Home() {
                 <Experience />
             </main>
             <Contact />
+            <MapLayout />
         </>
     );
 }

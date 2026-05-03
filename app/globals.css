@@ -126,3 +126,198 @@ html.dark {
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+/* Map styles */
+#map,
+.leaflet-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 1.5rem;
+    z-index: 10;
+}
+
+.custom-div-icon {
+    background: none;
+    border: none;
+    overflow: visible;
+}
+
+.active-filter {
+    border-color: #f59e0b !important;
+    background-color: rgba(245, 158, 11, 0.1) !important;
+    color: #f59e0b !important;
+}
+
+.map-custom-popup .leaflet-popup-content-wrapper {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    padding: 0;
+    overflow: hidden;
+}
+
+.map-custom-popup .leaflet-popup-content {
+    margin: 0;
+    width: 280px !important;
+    line-height: 1.4;
+}
+
+.map-custom-popup .leaflet-popup-tip {
+    background: hsl(var(--card));
+    box-shadow: none;
+}
+
+.map-custom-popup .leaflet-popup-close-button {
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    font-size: 18px;
+    color: hsl(var(--muted-foreground));
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 50%;
+    transition:
+        background 0.15s,
+        color 0.15s;
+    z-index: 10;
+    padding: 0;
+}
+
+.map-custom-popup .leaflet-popup-close-button:hover {
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+.map-popup-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.map-popup-img-wrap {
+    position: relative;
+    height: 148px;
+    overflow: hidden;
+    background: hsl(var(--muted));
+}
+
+.map-popup-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.map-popup-img-wrap:hover .map-popup-img {
+    transform: scale(1.04);
+}
+
+.map-popup-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    backdrop-filter: blur(8px);
+    text-transform: capitalize;
+}
+
+.map-popup-badge.food,
+.map-popup-badge.cafe {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.map-popup-badge.drink {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.25);
+}
+
+.map-popup-badge.university {
+    background: rgba(64, 106, 175, 0.15);
+    color: #406aaf;
+    border-color: rgba(64, 106, 175, 0.35);
+}
+
+.map-popup-badge.self-study {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+    border-color: rgba(16, 185, 129, 0.25);
+}
+
+.map-popup-badge.scenery {
+    background: rgba(34, 211, 238, 0.15);
+    color: #67e8f9;
+    border-color: rgba(34, 211, 238, 0.25);
+}
+
+.map-popup-body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.map-popup-address {
+    font-size: 10px;
+    font-weight: 600;
+    color: #f59e0b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.map-popup-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    line-height: 1.3;
+    margin: 0;
+}
+
+.map-popup-divider {
+    height: 1px;
+    width: 40px;
+    background: rgba(245, 158, 11, 0.4);
+    margin: 2px 0;
+}
+
+.map-popup-review {
+    font-size: 12px;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.6;
+    font-style: italic;
+    margin: 0;
+}
+
+.map-popup-description {
+    font-size: 13px;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.6;
+    font-style: italic;
+    text-align: center;
+    margin: 6px 0 0;
+}
+
+.map-popup-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    text-decoration: none;
+    margin-top: 4px;
+    transition: color 0.2s;
+}
+
+.map-popup-link:hover {
+    color: #f59e0b;
+}
