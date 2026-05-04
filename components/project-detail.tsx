@@ -40,7 +40,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
     };
 
     return (
-        <div className='py-16 space-y-8 max-w-3xl reveal mx-auto'>
+        <div className='py-2 space-y-8 max-w-3xl reveal mx-auto'>
             {/* Nút Back */}
             <Link
                 href='/projects'

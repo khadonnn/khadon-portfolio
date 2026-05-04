@@ -13,6 +13,11 @@ export default function Header() {
         useActiveSectionContext();
     const pathname = usePathname();
 
+    // Ẩn header khi ở projects page
+    if (pathname?.startsWith("/projects")) {
+        return null;
+    }
+
     // Ẩn header khi ở certificate page
     if (pathname?.startsWith("/certificate/")) {
         return null;

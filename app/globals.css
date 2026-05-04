@@ -32,8 +32,6 @@ html.dark {
         --accent: 210 40% 96.1%;
         --accent-foreground: 222.2 47.4% 11.2%;
         --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 210 40% 98%;
-        --border: 214.3 31.8% 91.4%;
         --input: 214.3 31.8% 91.4%;
         --ring: 222.2 84% 4.9%;
         --chart-1: 12 76% 61%;
@@ -78,6 +76,386 @@ html.dark {
     body {
         @apply bg-background text-foreground;
     }
+}
+
+@keyframes firefly-drift {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(0.85);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translate(var(--x1), var(--y1)) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(var(--x2), var(--y2)) scale(0.8);
+        opacity: 0.7;
+    }
+    75% {
+        transform: translate(var(--x3), var(--y3)) scale(1.05);
+        opacity: 0.95;
+    }
+}
+
+@keyframes firefly-flicker {
+    0%,
+    100% {
+        filter: blur(0px) brightness(1);
+    }
+    50% {
+        filter: blur(0.3px) brightness(1.4);
+    }
+}
+
+@keyframes repo-particle-drift {
+    0% {
+        transform: translate(0, 0) scale(0.4);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    50% {
+        transform: translate(var(--dx), var(--dy)) scale(1);
+        opacity: 0.95;
+    }
+    100% {
+        transform: translate(calc(var(--dx) * 1.8), calc(var(--dy) * 1.8))
+            scale(0.2);
+        opacity: 0;
+    }
+}
+
+@keyframes repo-particle-flicker {
+    0%,
+    100% {
+        filter: blur(0px) brightness(1);
+    }
+    50% {
+        filter: blur(0.35px) brightness(1.5);
+    }
+}
+
+.firefly-field {
+    contain: layout paint;
+}
+
+.firefly {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: radial-gradient(
+        circle,
+        rgba(236, 254, 255, 1) 0%,
+        rgba(100, 116, 139, 0.95) 28%,
+        rgba(71, 85, 105, 0.52) 55%,
+        rgba(71, 85, 105, 0) 72%
+    );
+    box-shadow: 0 0 8px rgba(71, 85, 105, 0.55);
+    animation:
+        firefly-drift var(--dur, 5s) ease-in-out infinite var(--delay, 0s),
+        firefly-flicker 2.2s ease-in-out infinite;
+    will-change: transform, opacity, filter;
+}
+
+.dark .firefly {
+    background: radial-gradient(
+        circle,
+        rgba(236, 254, 255, 1) 0%,
+        rgba(103, 232, 249, 0.95) 28%,
+        rgba(34, 211, 238, 0.35) 55%,
+        rgba(34, 211, 238, 0) 72%
+    );
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.85);
+}
+
+.firefly-1 {
+    left: 12%;
+    top: 22%;
+    --dur: 5.2s;
+    --delay: 0s;
+    --x1: 14px;
+    --y1: -10px;
+    --x2: 28px;
+    --y2: 12px;
+    --x3: 10px;
+    --y3: -18px;
+}
+
+.firefly-2 {
+    left: 22%;
+    top: 68%;
+    --dur: 6s;
+    --delay: 0.2s;
+    --x1: -12px;
+    --y1: -20px;
+    --x2: 18px;
+    --y2: -8px;
+    --x3: -20px;
+    --y3: 10px;
+}
+
+.firefly-3 {
+    left: 38%;
+    top: 30%;
+    --dur: 4.8s;
+    --delay: 0.5s;
+    --x1: 18px;
+    --y1: 8px;
+    --x2: -14px;
+    --y2: 18px;
+    --x3: 22px;
+    --y3: -12px;
+}
+
+.firefly-4 {
+    left: 48%;
+    top: 58%;
+    --dur: 5.7s;
+    --delay: 0.1s;
+    --x1: -16px;
+    --y1: 14px;
+    --x2: 20px;
+    --y2: -16px;
+    --x3: -10px;
+    --y3: 18px;
+}
+
+.firefly-5 {
+    left: 62%;
+    top: 24%;
+    --dur: 6.4s;
+    --delay: 0.35s;
+    --x1: 12px;
+    --y1: -18px;
+    --x2: 26px;
+    --y2: 10px;
+    --x3: -18px;
+    --y3: -10px;
+}
+
+.firefly-6 {
+    left: 74%;
+    top: 66%;
+    --dur: 5.1s;
+    --delay: 0.15s;
+    --x1: -10px;
+    --y1: 10px;
+    --x2: 16px;
+    --y2: -14px;
+    --x3: -24px;
+    --y3: 8px;
+}
+
+.firefly-7 {
+    left: 84%;
+    top: 38%;
+    --dur: 5.9s;
+    --delay: 0.45s;
+    --x1: -18px;
+    --y1: -8px;
+    --x2: 14px;
+    --y2: 16px;
+    --x3: -12px;
+    --y3: -20px;
+}
+
+.firefly-8 {
+    left: 90%;
+    top: 58%;
+    --dur: 6.2s;
+    --delay: 0.25s;
+    --x1: -8px;
+    --y1: -12px;
+    --x2: 16px;
+    --y2: 14px;
+    --x3: -14px;
+    --y3: 8px;
+}
+
+.repo-particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: radial-gradient(
+        circle,
+        rgba(236, 254, 255, 1) 0%,
+        rgba(100, 116, 139, 0.95) 26%,
+        rgba(71, 85, 105, 0.55) 54%,
+        rgba(71, 85, 105, 0) 72%
+    );
+    box-shadow: 0 0 10px rgba(71, 85, 105, 0.55);
+    animation:
+        repo-particle-drift var(--dur, 4.8s) ease-in-out infinite
+            var(--delay, 0s),
+        repo-particle-flicker 1.8s ease-in-out infinite;
+    will-change: transform, opacity, filter;
+}
+
+.dark .repo-particle {
+    background: radial-gradient(
+        circle,
+        rgba(236, 254, 255, 1) 0%,
+        rgba(103, 232, 249, 0.95) 26%,
+        rgba(34, 211, 238, 0.4) 54%,
+        rgba(34, 211, 238, 0) 72%
+    );
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.75);
+}
+
+.repo-particle-1 {
+    left: 14%;
+    top: 20%;
+    --dur: 5.2s;
+    --delay: 0s;
+    --dx: 10px;
+    --dy: -16px;
+}
+
+.repo-particle-2 {
+    left: 22%;
+    top: 72%;
+    --dur: 4.6s;
+    --delay: 0.2s;
+    --dx: -14px;
+    --dy: -20px;
+}
+
+.repo-particle-3 {
+    left: 34%;
+    top: 34%;
+    --dur: 5.8s;
+    --delay: 0.35s;
+    --dx: 18px;
+    --dy: 10px;
+}
+
+.repo-particle-4 {
+    left: 46%;
+    top: 62%;
+    --dur: 5s;
+    --delay: 0.1s;
+    --dx: -10px;
+    --dy: 14px;
+}
+
+.repo-particle-5 {
+    left: 58%;
+    top: 26%;
+    --dur: 6.1s;
+    --delay: 0.3s;
+    --dx: 16px;
+    --dy: -12px;
+}
+
+.repo-particle-6 {
+    left: 68%;
+    top: 70%;
+    --dur: 4.9s;
+    --delay: 0.15s;
+    --dx: -18px;
+    --dy: 8px;
+}
+
+.repo-particle-7 {
+    left: 80%;
+    top: 38%;
+    --dur: 5.6s;
+    --delay: 0.45s;
+    --dx: 12px;
+    --dy: 16px;
+}
+
+.repo-particle-8 {
+    left: 88%;
+    top: 58%;
+    --dur: 6s;
+    --delay: 0.25s;
+    --dx: -12px;
+    --dy: -14px;
+}
+
+/* SVG background container and svg centering */
+
+.firefly-3 {
+    left: 38%;
+    top: 30%;
+    --dur: 4.8s;
+    --delay: 0.5s;
+    --x1: 18px;
+    --y1: 8px;
+    --x2: -14px;
+    --y2: 18px;
+    --x3: 22px;
+    --y3: -12px;
+}
+
+.firefly-4 {
+    left: 48%;
+    top: 58%;
+    --dur: 5.7s;
+    --delay: 0.1s;
+    --x1: -16px;
+    --y1: 14px;
+    --x2: 20px;
+    --y2: -16px;
+    --x3: -10px;
+    --y3: 18px;
+}
+
+.firefly-5 {
+    left: 62%;
+    top: 24%;
+    --dur: 6.4s;
+    --delay: 0.35s;
+    --x1: 12px;
+    --y1: -18px;
+    --x2: 26px;
+    --y2: 10px;
+    --x3: -18px;
+    --y3: -10px;
+}
+
+.firefly-6 {
+    left: 74%;
+    top: 66%;
+    --dur: 5.1s;
+    --delay: 0.15s;
+    --x1: -10px;
+    --y1: 10px;
+    --x2: 16px;
+    --y2: -14px;
+    --x3: -24px;
+    --y3: 8px;
+}
+
+.firefly-7 {
+    left: 84%;
+    top: 38%;
+    --dur: 5.9s;
+    --delay: 0.45s;
+    --x1: -18px;
+    --y1: -8px;
+    --x2: 14px;
+    --y2: 16px;
+    --x3: -12px;
+    --y3: -20px;
+}
+
+.firefly-8 {
+    left: 90%;
+    top: 58%;
+    --dur: 6.2s;
+    --delay: 0.25s;
+    --x1: -8px;
+    --y1: -12px;
+    --x2: 16px;
+    --y2: 14px;
+    --x3: -14px;
+    --y3: 8px;
 }
 /* SVG background container and svg centering */
 

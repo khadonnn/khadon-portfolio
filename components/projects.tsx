@@ -6,8 +6,7 @@ import { projectsData } from "@/lib/data";
 import Project from "./project";
 import { useScroll } from "framer-motion";
 import { useSectionInView } from "@/lib/hooks";
-import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import ProjectsButton from "./projects-button";
 
 export default function Projects() {
     const { ref } = useSectionInView("Projects", 0.5);
@@ -28,17 +27,8 @@ export default function Projects() {
                     </React.Fragment>
                 ))}
             </div>
-            <div className='flex justify-end mt-6 '>
-                <Link
-                    href='/projects'
-                    className='group flex items-center gap-1 cursor-pointer text-lg font-medium underline underline-offset-4'
-                >
-                    See more projects
-                    <ArrowUpRight
-                        className='transition-transform duration-300  group-hover:rotate-45'
-                        size={18}
-                    />
-                </Link>
+            <div className='flex justify-center mt-12 mb-4'>
+                <ProjectsButton />
             </div>
         </section>
     );
