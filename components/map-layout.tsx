@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import MapComponent from "./map";
-import { Place, getPlaceLabel } from "./place-types";
+import { Place, getPlaceLabel } from "../types/place-types";
 
 const defaultPlaces: Place[] = [
     {

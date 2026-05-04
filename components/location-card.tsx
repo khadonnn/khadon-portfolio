@@ -1,5 +1,5 @@
 import React from "react";
-import { Place, getPlaceLabel } from "./place-types";
+import { Place, getPlaceLabel } from "../types/place-types";
 
 const badgeClass = (cat?: string) => {
     switch (cat) {

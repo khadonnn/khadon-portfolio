@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Place, getPlaceLabel } from "./place-types";
+import { Place, getPlaceLabel } from "../types/place-types";
 
 interface MapProps {
     center?: [number, number];
