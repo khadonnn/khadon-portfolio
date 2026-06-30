@@ -34,7 +34,7 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
     const [loadError, setLoadError] = useState(false);
     const [isUnmounted, setIsUnmounted] = useState(false);
     const videoRef = useRef<HTMLVideoElement | null>(null);
-
+    const hasCompletedLoad = useRef(false);
     const pathname = usePathname();
     const isCertificatePage = pathname?.startsWith("/certificate/");
 
@@ -51,6 +51,7 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
             if (!isCertificatePage) setIsReady(true);
             return;
         }
+        if (hasCompletedLoad.current) return; // Ngăn chặn việc load lại video khi component re-render
 
         setLoadProgress(0);
 
@@ -73,17 +74,33 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         }, 150);
 
         // 2. Con số hiển thị luôn đuổi theo target từng 1% (chống chớp số)
+        // 2. Con số hiển thị luôn đuổi theo target từng 1% (chống chớp số)
         const renderInterval = setInterval(() => {
             if (currentVal < targetVal) {
-                currentVal += 1;
-                // Keep progress monotonic even if effects overlap on slower devices.
-                setLoadProgress((prev) => Math.max(prev, currentVal));
+                currentVal = Math.min(currentVal + 1, 100);
+
+                // Không cho progress giảm hoặc vượt quá 100%
+                setLoadProgress((prev) =>
+                    Math.min(100, Math.max(prev, currentVal)),
+                );
             }
 
-            // 3. Khi chạm 100%, kết thúc trơn tru
+            // Khi đạt 100% thì khóa lại
             if (currentVal >= 100) {
+                currentVal = 100;
+
                 clearInterval(renderInterval);
-                setTimeout(() => setIsReady(true), 200);
+
+                hasCompletedLoad.current = true;
+
+                // Đảm bảo UI luôn hiển thị đúng 100%
+                setLoadProgress(100);
+
+                setTimeout(() => {
+                    setIsReady(true);
+                }, 200);
+
+                return;
             }
         }, 15);
 
@@ -232,11 +249,13 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
                             <div className='h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
                                 <div
                                     className='h-full bg-gradient-to-r from-pink-500 via-purple-500 to-violet-500 transition-all duration-100'
-                                    style={{ width: `${loadProgress}%` }}
+                                    style={{
+                                        width: `${Math.min(loadProgress, 100)}%`,
+                                    }}
                                 />
                             </div>
                             <p className='text-center text-xs text-gray-500 dark:text-gray-400 mt-2 font-mono'>
-                                {loadProgress}%
+                                {Math.min(loadProgress, 100)}%
                             </p>
                         </div>
                         <div className='loading-text-container text-center'>
