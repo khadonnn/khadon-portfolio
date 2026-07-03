@@ -19,6 +19,8 @@ export default function HeroScrollAnimation() {
 
     const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const minLoadTimeRef = useRef<NodeJS.Timeout | null>(null);
+    const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const hasMarkedReadyRef = useRef(false);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -63,30 +65,45 @@ export default function HeroScrollAnimation() {
         const animationState = { frame: 0 };
         let loadedCount = 0;
 
-        // ... (Giữ nguyên logic loading batch của bạn ở đây - không thay đổi) ...
-        // Mình rút gọn đoạn loading để tập trung vào phần render fix lỗi crop
+        const finishLoading = () => {
+            if (hasMarkedReadyRef.current) return;
+
+            hasMarkedReadyRef.current = true;
+
+            if (progressIntervalRef.current) {
+                clearInterval(progressIntervalRef.current);
+                progressIntervalRef.current = null;
+            }
+
+            if (loadTimeoutRef.current) {
+                clearTimeout(loadTimeoutRef.current);
+                loadTimeoutRef.current = null;
+            }
+
+            if (minLoadTimeRef.current) {
+                clearTimeout(minLoadTimeRef.current);
+                minLoadTimeRef.current = null;
+            }
+
+            setLoadProgress(100);
+            setIsReady(true);
+        };
+
+        progressIntervalRef.current = setInterval(() => {
+            setLoadProgress((prev) => Math.min(95, prev + 4));
+        }, 60) as unknown as NodeJS.Timeout;
 
         // --- LOGIC LOADING START (Giữ nguyên logic cũ của bạn) ---
         const BATCH_SIZE = 15;
         const MIN_LOAD_TIME = 800;
-        const REQUIRED_PROGRESS = 0.5;
-        let imagesReadyToShow = false;
-        let minLoadTimePassed = false;
-
-        const checkAndShowAnimation = () => {
-            if (imagesReadyToShow && minLoadTimePassed) {
-                setIsReady(true);
-            }
-        };
 
         minLoadTimeRef.current = setTimeout(() => {
-            minLoadTimePassed = true;
-            checkAndShowAnimation();
+            finishLoading();
         }, MIN_LOAD_TIME);
 
         loadTimeoutRef.current = setTimeout(() => {
             setLoadError(true);
-            setIsReady(true);
+            finishLoading();
         }, 20000);
 
         // Helper Loading Batch (Giữ nguyên code cũ của bạn)
@@ -98,17 +115,6 @@ export default function HeroScrollAnimation() {
                 const p = new Promise<void>((resolve) => {
                     img.onload = () => {
                         loadedCount++;
-                        const progress = Math.round(
-                            (loadedCount / frameCount) * 100,
-                        );
-                        requestAnimationFrame(() => setLoadProgress(progress));
-                        if (
-                            !imagesReadyToShow &&
-                            loadedCount >= frameCount * REQUIRED_PROGRESS
-                        ) {
-                            imagesReadyToShow = true;
-                            checkAndShowAnimation();
-                        }
                         resolve();
                     };
                     img.onerror = () => {
@@ -313,6 +319,8 @@ export default function HeroScrollAnimation() {
             ScrollTrigger.getAll().forEach((t) => t.kill());
             if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
             if (minLoadTimeRef.current) clearTimeout(minLoadTimeRef.current);
+            if (progressIntervalRef.current)
+                clearInterval(progressIntervalRef.current);
         };
     }, []);
 

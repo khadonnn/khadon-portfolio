@@ -17,7 +17,7 @@ type LoadingContextType = {
     loadProgress: number;
     loadError: boolean;
     setIsReady: (value: boolean) => void;
-    setLoadProgress: (value: number) => void;
+    setLoadProgress: (value: number | ((prev: number) => number)) => void;
     setLoadError: (value: boolean) => void;
 };
 
@@ -30,13 +30,34 @@ interface LoadingProviderProps {
 
 export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
     const [isReady, setIsReady] = useState(false);
-    const [loadProgress, setLoadProgress] = useState(0);
+    const [loadProgressValue, setLoadProgressValue] = useState(0);
     const [loadError, setLoadError] = useState(false);
     const [isUnmounted, setIsUnmounted] = useState(false);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const hasCompletedLoad = useRef(false);
+    const isProgressLocked = useRef(false);
+    const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const finishTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const pathname = usePathname();
     const isCertificatePage = pathname?.startsWith("/certificate/");
+
+    const setLoadProgress = (value: number | ((prev: number) => number)) => {
+        setLoadProgressValue((prev) => {
+            const next = typeof value === "function" ? value(prev) : value;
+
+            if (isProgressLocked.current && next < 100) {
+                return prev;
+            }
+
+            const nextValue = Math.min(100, Math.max(prev, next));
+
+            if (nextValue >= 100) {
+                isProgressLocked.current = true;
+            }
+
+            return nextValue;
+        });
+    };
 
     useEffect(() => {
         if (isCertificatePage) {
@@ -61,74 +82,52 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         video.muted = true;
         video.playsInline = true;
 
-        let currentVal = 0;
-        let targetVal = 0;
-        let isVideoLoaded = false;
+        let currentProgress = 0;
 
-        // 1. Target tăng ngẫu nhiên nhưng cực mượt lên tối đa 90%
-        const fakeInterval = setInterval(() => {
-            if (targetVal < 90 && !isVideoLoaded) {
-                targetVal += Math.floor(Math.random() * 8) + 2;
-                if (targetVal > 90) targetVal = 90;
-            }
-        }, 150);
+        progressIntervalRef.current = setInterval(() => {
+            currentProgress = Math.min(currentProgress + 4, 95);
+            setLoadProgress(currentProgress);
+        }, 60);
 
-        // 2. Con số hiển thị luôn đuổi theo target từng 1% (chống chớp số)
-        // 2. Con số hiển thị luôn đuổi theo target từng 1% (chống chớp số)
-        const renderInterval = setInterval(() => {
-            if (currentVal < targetVal) {
-                currentVal = Math.min(currentVal + 1, 100);
+        const finishLoading = () => {
+            if (hasCompletedLoad.current) return;
 
-                // Không cho progress giảm hoặc vượt quá 100%
-                setLoadProgress((prev) =>
-                    Math.min(100, Math.max(prev, currentVal)),
-                );
+            hasCompletedLoad.current = true;
+
+            if (progressIntervalRef.current) {
+                clearInterval(progressIntervalRef.current);
+                progressIntervalRef.current = null;
             }
 
-            // Khi đạt 100% thì khóa lại
-            if (currentVal >= 100) {
-                currentVal = 100;
-
-                clearInterval(renderInterval);
-
-                hasCompletedLoad.current = true;
-
-                // Đảm bảo UI luôn hiển thị đúng 100%
-                setLoadProgress(100);
-
-                setTimeout(() => {
-                    setIsReady(true);
-                }, 200);
-
-                return;
+            if (finishTimeoutRef.current) {
+                clearTimeout(finishTimeoutRef.current);
+                finishTimeoutRef.current = null;
             }
-        }, 15);
 
-        // Lắng nghe video xong thật thì chốt hạ lên 100
-        const handleCanPlayThrough = () => {
-            isVideoLoaded = true;
-            clearInterval(fakeInterval);
-            targetVal = 100;
+            setLoadProgress(100);
+            setIsReady(true);
         };
+
+        finishTimeoutRef.current = setTimeout(() => {
+            finishLoading();
+        }, 1200);
 
         const handleVideoError = () => {
             console.warn("Video load lỗi → Cho qua Loading luôn");
-            isVideoLoaded = true;
-            clearInterval(fakeInterval);
-            targetVal = 100;
             setLoadError(true);
+            finishLoading();
         };
 
-        video.addEventListener("canplaythrough", handleCanPlayThrough);
         video.addEventListener("error", handleVideoError);
 
         video.src = videoSrc;
         video.load();
 
         return () => {
-            clearInterval(fakeInterval);
-            clearInterval(renderInterval);
-            video.removeEventListener("canplaythrough", handleCanPlayThrough);
+            if (progressIntervalRef.current)
+                clearInterval(progressIntervalRef.current);
+            if (finishTimeoutRef.current)
+                clearTimeout(finishTimeoutRef.current);
             video.removeEventListener("error", handleVideoError);
         };
     }, [videoSrc, isCertificatePage]);
@@ -219,7 +218,7 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         <LoadingContext.Provider
             value={{
                 isReady,
-                loadProgress,
+                loadProgress: loadProgressValue,
                 loadError,
                 setIsReady,
                 setLoadProgress,
@@ -250,12 +249,12 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
                                 <div
                                     className='h-full bg-gradient-to-r from-pink-500 via-purple-500 to-violet-500 transition-all duration-100'
                                     style={{
-                                        width: `${Math.min(loadProgress, 100)}%`,
+                                        width: `${Math.min(loadProgressValue, 100)}%`,
                                     }}
                                 />
                             </div>
                             <p className='text-center text-xs text-gray-500 dark:text-gray-400 mt-2 font-mono'>
-                                {Math.min(loadProgress, 100)}%
+                                {Math.min(loadProgressValue, 100)}%
                             </p>
                         </div>
                         <div className='loading-text-container text-center'>
