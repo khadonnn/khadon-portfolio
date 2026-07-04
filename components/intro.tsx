@@ -116,8 +116,10 @@ const Intro = () => {
                 initial={{ opacity: 0, y: 100 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <b>Hi, I'm Khadondev.</b> A <b>Full-stack Developer</b> (8
-                months exp) passionate about building <i>web & apps</i>.
+                <b>Hi, I'm Khadondev.</b> A{" "}
+                <b>self-taught Full-stack Developer</b> with 8 months of
+                hands-on experience, passionate about building <i>web & apps</i>
+                .
                 <span className='hidden md:inline'>
                     {" "}
                     My focus is{" "}

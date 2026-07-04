@@ -353,7 +353,7 @@ export default function HeroScrollAnimation() {
             >
                 {/* SỬA: Giảm kích thước chữ một chút trên mobile (text-3xl) */}
                 <h2 className='text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-2'>
-                    Scroll to experience
+                    Scroll to explore
                 </h2>
             </div>
         </section>

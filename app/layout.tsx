@@ -44,7 +44,7 @@ export default function RootLayout({
                     <LoadingProvider videoSrc='/assets/video_bg/galaxy.mp4'>
                         <ActiveSectionContextProvider>
                             <Header />
-                            <div className='pt-28 sm:pt-36 flex-grow'>
+                            <div className='pt-20 sm:pt-24 flex-grow'>
                                 {children}
                             </div>
                             <Footer />

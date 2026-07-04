@@ -17,14 +17,7 @@ const GITHUB_USER = "khadonnn";
 
 async function fetchRepos(): Promise<Repo[]> {
     const res = await fetch(
-        `https://api.github.com/users/${GITHUB_USER}/repos?per_page=100`,
-        {
-            headers: {
-                Accept: "application/vnd.github.mercy-preview+json",
-            },
-            // cache for 1 hour on the server
-            next: { revalidate: 3600 },
-        },
+        `https://api.github.com/users/${GITHUB_USER}/repos?per_page=100&sort=updated&direction=desc`,
     );
 
     if (!res.ok) return [];
@@ -42,7 +35,7 @@ export default async function ProjectsPage() {
     const repos = await fetchRepos();
 
     return (
-        <div className='-mt-16 py-8 max-w-6xl mx-auto px-4'>
+        <div className='-mt-20 py-8 max-w-6xl mx-auto px-4'>
             {/* Back to Home */}
             <Link
                 href='/#home'
@@ -66,7 +59,9 @@ export default async function ProjectsPage() {
             </Link>
 
             <header className='mb-8'>
-                <h1 className='text-4xl font-bold text-foreground'>Projects</h1>
+                <h1 className='text-4xl font-bold text-foreground'>
+                    Projects gallery
+                </h1>
                 <p className='text-muted-foreground mt-2'>
                     A curated list of my public GitHub projects. Click any card
                     for details.

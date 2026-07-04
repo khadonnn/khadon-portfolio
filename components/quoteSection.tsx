@@ -10,12 +10,12 @@ const QuoteSection = () => {
                 {/* Sửa text-5x thành text-5xl */}
                 <blockquote className='text-3xl sm:text-5xl md:text-6xl font-bold leading-tight text-gray-700 dark:text-gray-200'>
                     <span className='inline-block' style={{ lineHeight: 1.2 }}>
-                        Talk is{" "}
+                        Make it{" "}
                         <HighlightText
-                            color='#34d399'
+                            color='#F5788B'
                             className='text-gray-900 dark:text-gray-100 px-2 py-1 rounded-md align-middle'
                         >
-                            cheap.
+                            work.
                         </HighlightText>
                     </span>
                     <br />
@@ -23,18 +23,31 @@ const QuoteSection = () => {
                         className='inline-block mt-2'
                         style={{ lineHeight: 1.2 }}
                     >
-                        Show me{" "}
+                        Make it{" "}
+                        <HighlightText
+                            color='#34d399'
+                            className='text-gray-900 dark:text-gray-100 px-2 py-1 rounded-md align-middle'
+                        >
+                            right.
+                        </HighlightText>
+                    </span>
+                    <br />
+                    <span
+                        className='inline-block mt-2'
+                        style={{ lineHeight: 1.2 }}
+                    >
+                        Make it{" "}
                         <HighlightText
                             color='#fde047'
                             className='text-gray-900 dark:text-gray-100 px-2 py-1 rounded-md align-middle'
                         >
-                            the code.
+                            fast.
                         </HighlightText>
                     </span>
                 </blockquote>
 
                 <p className='mt-6 md:mt-8 text-lg md:text-xl text-gray-800 dark:text-gray-400 italic'>
-                    — Linus Torvalds
+                    — Kent Beck
                 </p>
             </div>
         </section>
