@@ -2,8 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: "Satoshi";
+    src: url("/Satoshi-Variable.woff2") format("woff2");
+    font-weight: 300 900;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Satoshi";
+    src: url("/Satoshi-VariableItalic.woff2") format("woff2");
+    font-weight: 300 900;
+    font-display: swap;
+    font-style: italic;
+}
+
 html {
     --line-color: #e5e7eb;
+}
+
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+html.lenis {
+    scroll-behavior: auto !important;
+}
+
+html.lenis body {
+    overscroll-behavior: none;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+    pointer-events: none;
 }
 
 html.dark {
@@ -14,9 +55,18 @@ html.dark {
     @apply border border-black/10;
 }
 
+.font-satoshi {
+    font-family:
+        "Satoshi",
+        system-ui,
+        -apple-system,
+        sans-serif;
+}
+
 @layer base {
     :root {
         color-scheme: light dark;
+        --font-sans: "Inter", system-ui, -apple-system, sans-serif;
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;
         --card: 0 0% 100%;
@@ -75,6 +125,7 @@ html.dark {
     }
     body {
         @apply bg-background text-foreground;
+        font-family: var(--font-sans);
     }
 }
 

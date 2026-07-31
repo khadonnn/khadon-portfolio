@@ -1,23 +1,133 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
-
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { motion, useInView, useMotionValue, animate } from "framer-motion";
+import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SectionHeading from "@/components/section-heading";
+import Image from "next/image";
 import { useSectionInView } from "@/lib/hooks";
-import { ScrollAnimatedTooltip } from "@/components/ui/scroll-animated-tooltip";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+gsap.registerPlugin(ScrollTrigger);
 
-export default function About() {
+const STATS = [
+    { label: "Years of Coding", target: 2, suffix: "+" },
+    { label: "Projects Built", target: 12, suffix: "+" },
+    { label: "Technologies Learned", target: 10, suffix: "+" },
+    { label: "GitHub Repositories", target: 40, suffix: "+" },
+];
+
+const TECH_STACK = [
+    "TypeScript",
+    "JavaScript",
+    "React",
+    "Next.js",
+    "Node.js",
+    "Express.js",
+    "Tailwind CSS",
+    "PostgreSQL",
+    "MongoDB",
+    "Prisma",
+    "Docker",
+    "Git",
+];
+
+const QUOTE_WORDS = [
+    "I",
+    "build",
+    "modern",
+    "full-stack",
+    "applications",
+    "with",
+    "clean",
+    "code,",
+    "scalable",
+    "solutions,",
+    "and",
+    "great",
+    "user",
+    "experiences.",
+];
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+/* Smooth count-up, fires once on scroll into view */
+function CountUp({
+    target,
+    suffix,
+    inView,
+    delay = 0,
+}: {
+    target: number;
+    suffix: string;
+    inView: boolean;
+    delay?: number;
+}) {
+    const [display, setDisplay] = useState(0);
+    const count = useMotionValue(0);
+    const started = useRef(false);
+
+    useEffect(() => {
+        if (!inView || started.current) return;
+        started.current = true;
+        const ctrl = animate(count, target, {
+            duration: 2.2,
+            delay,
+            ease: [0.16, 1, 0.3, 1],
+            onUpdate: (v) => setDisplay(Math.round(v)),
+        });
+        return () => ctrl.stop();
+    }, [inView, target, count, delay]);
+
+    return (
+        <>
+            {display}
+            {suffix}
+        </>
+    );
+}
+
+/* Word-by-word animated pull quote */
+function AnimatedQuote({ inView }: { inView: boolean }) {
+    return (
+        <p
+            style={{
+                fontFamily: "var(--font-instrument), Georgia, serif",
+                fontStyle: "italic",
+                fontSize: "clamp(1.8rem, 3.5vw, 3.5rem)",
+                letterSpacing: "-0.01em",
+                lineHeight: 1.2,
+                color: "#0A0A0A",
+            }}
+        >
+            &ldquo;
+            {QUOTE_WORDS.map((word, i) => (
+                <motion.span
+                    key={i}
+                    initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
+                    animate={
+                        inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}
+                    }
+                    transition={{
+                        duration: 0.55,
+                        delay: 0.05 + i * 0.045,
+                        ease: EASE,
+                    }}
+                    style={{ display: "inline-block", marginRight: "0.28em" }}
+                >
+                    {word}
+                </motion.span>
+            ))}
+            &rdquo;
+        </p>
+    );
+}
+
+export function About() {
     const sectionRef = useRef<HTMLElement | null>(null);
-    const panelRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
+    const statsRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLDivElement>(null);
-    const imageCardRef = useRef<HTMLDivElement>(null);
-    const { ref: inViewRef } = useSectionInView("About", 0.5);
+    const lineRef = useRef<HTMLDivElement>(null);
+    const { ref: inViewRef } = useSectionInView("About", 0.2);
 
     const setSectionRefs = useCallback(
         (node: HTMLElement | null) => {
@@ -27,214 +137,310 @@ export default function About() {
         [inViewRef],
     );
 
-    useGSAP(
-        () => {
-            if (
-                !panelRef.current ||
-                !textRef.current ||
-                !imageRef.current ||
-                !imageCardRef.current ||
-                !sectionRef.current
-            ) {
-                return;
-            }
-
-            const copyLines = textRef.current.querySelectorAll(".about-copy");
-
-            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-                gsap.set(
-                    [panelRef.current, textRef.current, imageRef.current],
+    const sectionInView = useInView(sectionRef, { once: true, margin: "-10%" });
+    const statsInView = useInView(statsRef, { once: true, margin: "-5%" });
+    useEffect(() => {
+        if (!sectionRef.current) return;
+        const ctx = gsap.context(() => {
+            /* Horizontal rule draw-in */
+            if (lineRef.current) {
+                gsap.fromTo(
+                    lineRef.current,
+                    { scaleX: 0, transformOrigin: "left center" },
                     {
-                        clearProps: "all",
-                        autoAlpha: 1,
+                        scaleX: 1,
+                        duration: 1.4,
+                        ease: "power4.inOut",
+                        scrollTrigger: {
+                            trigger: lineRef.current,
+                            start: "top 85%",
+                        },
                     },
                 );
-                gsap.set([copyLines, imageCardRef.current], {
-                    clearProps: "all",
-                });
-                return;
             }
 
-            const tl = gsap.timeline({
-                paused: true,
-                defaults: {
-                    ease: "power3.out",
-                },
-            });
-
-            tl.fromTo(
-                panelRef.current,
+            /* Image clip-path reveal */
+            gsap.fromTo(
+                imageRef.current,
+                { clipPath: "inset(0 100% 0 0)" },
                 {
-                    autoAlpha: 0,
-                    y: 34,
-                    clipPath: "inset(8% 0% 14% 0% round 24px)",
+                    clipPath: "inset(0 0% 0 0)",
+                    duration: 1.4,
+                    ease: "power4.inOut",
+                    scrollTrigger: {
+                        trigger: imageRef.current,
+                        start: "top 78%",
+                    },
                 },
-                {
-                    autoAlpha: 1,
-                    y: 0,
-                    clipPath: "inset(0% 0% 0% 0% round 16px)",
-                    duration: 1.05,
-                },
-                0,
-            )
-                .fromTo(
-                    copyLines,
-                    {
-                        autoAlpha: 0,
-                        yPercent: 70,
-                        rotateX: 12,
-                        filter: "blur(6px)",
-                        transformOrigin: "50% 100%",
-                    },
-                    {
-                        autoAlpha: 1,
-                        yPercent: 0,
-                        rotateX: 0,
-                        filter: "blur(0px)",
-                        duration: 0.95,
-                        stagger: 0.14,
-                    },
-                    0.24,
-                )
-                .fromTo(
-                    imageRef.current,
-                    {
-                        autoAlpha: 0,
-                        xPercent: 12,
-                        rotateY: -8,
-                    },
-                    {
-                        autoAlpha: 1,
-                        xPercent: 0,
-                        rotateY: 0,
-                        duration: 1.15,
-                    },
-                    0.18,
-                )
-                .fromTo(
-                    imageCardRef.current,
-                    {
-                        clipPath: "inset(18% 10% 18% 10% round 20px)",
-                        scale: 0.9,
-                    },
-                    {
-                        clipPath: "inset(0% 0% 0% 0% round 12px)",
-                        scale: 1,
-                        duration: 1.1,
-                    },
-                    0.12,
-                );
-
-            const entranceTrigger = ScrollTrigger.create({
-                trigger: sectionRef.current,
-                start: "top 86%",
-                end: "bottom 20%",
-                invalidateOnRefresh: true,
-                onEnter: () => tl.play(),
-                onEnterBack: () => tl.play(),
-                onLeaveBack: () => tl.progress(0).pause(),
-            });
-
-            ScrollTrigger.refresh();
-
-            return () => {
-                entranceTrigger.kill();
-                tl.kill();
-            };
-        },
-        { scope: sectionRef },
-    );
+            );
+        }, sectionRef);
+        return () => ctx.revert();
+    }, []);
 
     return (
         <section
             ref={setSectionRefs}
-            className='mb-28 max-w-[65rem] leading-8 sm:mb-28 scroll-mt-28'
             id='about'
+            className='w-full bg-white/70 border-t border-black/[0.08] '
         >
-            <SectionHeading>About Me</SectionHeading>
-            <div
-                ref={panelRef}
-                className='rounded-2xl border border-black/[0.08] bg-gradient-to-br from-white/85 via-white/70 to-white/45 p-6 shadow-[0_36px_80px_-34px_rgba(0,0,0,0.55)] backdrop-blur-md dark:border-white/15 dark:from-white/12 dark:via-white/8 dark:to-white/5 md:p-8'
-            >
-                <div className='grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center'>
-                    <div
-                        ref={textRef}
-                        className='relative z-20 overflow-visible text-left will-change-transform will-change-opacity'
+            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] py-[clamp(5rem,10vw,11rem)] radius-tl-[clamp(2rem,5vw,4rem)] radius-tr-[clamp(2rem,5vw,4rem)]'>
+                {/* Section label */}
+                <div className='flex items-center gap-4 mb-[clamp(2rem,4vw,4rem)]'>
+                    <motion.span
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={sectionInView ? { opacity: 1, x: 0 } : {}}
+                        transition={{ duration: 0.6, ease: EASE }}
+                        className='text-[0.6rem] tracking-[0.22em] uppercase text-black/30 font-medium'
+                        style={{ fontFamily: "Satoshi, system-ui, sans-serif" }}
                     >
-                        <div className='about-copy-wrap mb-4'>
-                            <div className='about-copy text-lg leading-relaxed text-gray-800 dark:text-gray-100'>
-                                After a degree in{" "}
-                                <ScrollAnimatedTooltip
-                                    content={<FirstDegree />}
+                        About
+                    </motion.span>
+                    <div ref={lineRef} className='flex-1 h-px bg-black/10' />
+                </div>
+
+                {/* Headline */}
+                <motion.h2
+                    initial={{ opacity: 0, y: 32 }}
+                    animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.85, delay: 0.1, ease: EASE }}
+                    className='font-black text-black tracking-tighter leading-[0.88] mb-[clamp(3rem,6vw,7rem)]'
+                    style={{
+                        fontFamily: "Satoshi, system-ui, sans-serif",
+                        fontWeight: 900,
+                        fontSize: "clamp(3rem, 7vw, 7rem)",
+                    }}
+                >
+                    About{" "}
+                    <span
+                        style={{
+                            fontFamily:
+                                "var(--font-instrument), Georgia, serif",
+                            fontStyle: "italic",
+                            fontWeight: 400,
+                            color: "rgba(10,10,10,0.30)",
+                        }}
+                    >
+                        Me
+                    </span>
+                </motion.h2>
+
+                {/* Grid */}
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-[clamp(3rem,6vw,8rem)]'>
+                    {/* Left: stats + TECH_STACK */}
+                    <div className='flex flex-col gap-[clamp(2.5rem,4vw,3.5rem)]'>
+                        <div
+                            ref={statsRef}
+                            className='grid grid-cols-2 gap-x-8 gap-y-12 content-start'
+                        >
+                            {STATS.map((stat, i) => (
+                                <motion.div
+                                    key={stat.label}
+                                    initial={{
+                                        opacity: 0,
+                                        y: 28,
+                                        clipPath: "inset(100% 0 0 0)",
+                                    }}
+                                    animate={
+                                        statsInView
+                                            ? {
+                                                  opacity: 1,
+                                                  y: 0,
+                                                  clipPath: "inset(0% 0 0 0)",
+                                              }
+                                            : {}
+                                    }
+                                    transition={{
+                                        duration: 0.7,
+                                        delay: i * 0.1,
+                                        ease: EASE,
+                                    }}
                                 >
-                                    <b className='underline font-semibold'>
-                                        Business Administration
-                                    </b>
-                                </ScrollAnimatedTooltip>{" "}
-                                at{" "}
-                                <ScrollAnimatedTooltip
-                                    containerClassName='relative z-[1200] underline'
-                                    content={<TDTCard />}
-                                >
-                                    <b className='underline'>TDTU</b>
-                                </ScrollAnimatedTooltip>
-                                , I pivoted to{" "}
-                                <span className='font-semibold'>
-                                    Full-stack Development
-                                </span>
-                                . I love solving complex problems using
-                                <span className='font-semibold text-gray-950 dark:text-blue-300'>
-                                    {" "}
-                                    React, Next.js, TypeScript, and MongoDB.
-                                </span>
-                            </div>
+                                    <p
+                                        className='font-black text-black leading-none tracking-tighter tabular-nums'
+                                        style={{
+                                            fontFamily:
+                                                "Satoshi, system-ui, sans-serif",
+                                            fontWeight: 900,
+                                            fontSize:
+                                                "clamp(3.5rem, 7vw, 9rem)",
+                                        }}
+                                    >
+                                        <CountUp
+                                            target={stat.target}
+                                            suffix={stat.suffix}
+                                            inView={statsInView}
+                                            delay={i * 0.12}
+                                        />
+                                    </p>
+
+                                    <motion.p
+                                        initial={{ opacity: 0 }}
+                                        animate={
+                                            statsInView ? { opacity: 1 } : {}
+                                        }
+                                        transition={{
+                                            duration: 0.5,
+                                            delay: 0.4 + i * 0.1,
+                                            ease: EASE,
+                                        }}
+                                        className='mt-2 text-[0.75rem] font-semibold tracking-[0.14em] uppercase text-black/40'
+                                        style={{
+                                            fontFamily:
+                                                "Satoshi, system-ui, sans-serif",
+                                        }}
+                                    >
+                                        {stat.label}
+                                    </motion.p>
+
+                                    {/* Underline draws in after the number settles */}
+                                    <motion.div
+                                        className='mt-4 h-px bg-black/10'
+                                        initial={{
+                                            scaleX: 0,
+                                            transformOrigin: "left",
+                                        }}
+                                        animate={
+                                            statsInView ? { scaleX: 1 } : {}
+                                        }
+                                        transition={{
+                                            duration: 0.8,
+                                            delay: 0.6 + i * 0.1,
+                                            ease: EASE,
+                                        }}
+                                    />
+                                </motion.div>
+                            ))}
                         </div>
 
-                        <div className='about-copy-wrap'>
-                            <div className='about-copy text-lg leading-relaxed text-gray-800 dark:text-gray-100'>
-                                Coding{" "}
-                                <span className='italic font-medium'>
-                                    8+ hours daily
-                                </span>
-                                , I am now pursuing a{" "}
-                                <span className='underline font-medium'>
-                                    Second Degree
-                                </span>{" "}
-                                at{" "}
-                                <ScrollAnimatedTooltip content={<UITCard />}>
-                                    <b className='underline'>UIT</b>
-                                </ScrollAnimatedTooltip>{" "}
-                                to deepen my expertise. I am seeking a
-                                <span className='font-bold'>
-                                    {" "}
-                                    full-time software developer{" "}
-                                </span>{" "}
-                                role to contribute and grow.
+                        {/* TECH_STACK served */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={statsInView ? { opacity: 1, y: 0 } : {}}
+                            transition={{
+                                duration: 0.7,
+                                delay: 0.5,
+                                ease: EASE,
+                            }}
+                        >
+                            <p
+                                className='text-[0.7rem] font-semibold tracking-[0.18em] uppercase text-black/35 mb-4'
+                                style={{
+                                    fontFamily:
+                                        "Satoshi, system-ui, sans-serif",
+                                }}
+                            >
+                                Tech Stack
+                            </p>
+                            <div className='flex flex-wrap gap-2'>
+                                {TECH_STACK.map((country, i) => (
+                                    <motion.span
+                                        key={country}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={
+                                            statsInView
+                                                ? { opacity: 1, y: 0 }
+                                                : {}
+                                        }
+                                        transition={{
+                                            duration: 0.4,
+                                            delay: 0.6 + i * 0.05,
+                                            ease: EASE,
+                                        }}
+                                        className='border border-black/12 px-3 py-1.5 text-[0.68rem] font-medium tracking-[0.06em] text-black/50'
+                                        style={{
+                                            fontFamily:
+                                                "Satoshi, system-ui, sans-serif",
+                                        }}
+                                    >
+                                        {country}
+                                    </motion.span>
+                                ))}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
 
-                    <div
-                        ref={imageRef}
-                        className='relative z-10 flex justify-center md:justify-end will-change-transform will-change-opacity'
-                    >
-                        <div
-                            ref={imageCardRef}
-                            className='relative h-[460px] w-full max-w-[320px] overflow-hidden shadow-md rounded-xl md:h-[300px] md:max-w-[420px]'
+                    {/* Right: quote + body + image */}
+                    <div className='flex flex-col justify-between gap-10 font-satoshi'>
+                        <AnimatedQuote inView={sectionInView} />
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                            transition={{
+                                duration: 0.8,
+                                delay: 0.55,
+                                ease: EASE,
+                            }}
+                            className='space-y-5'
                         >
-                            <img
-                                src='/assets/about/about.jpg'
-                                alt='About me'
-                                className='h-full w-full rounded-xl object-cover object-[24%_30%] md:object-[left_30%] shadow-xl'
-                            />
-                            <div
-                                className='pointer-events-none absolute inset-0 rounded-xl opacity-35 mix-blend-soft-light dark:opacity-45'
+                            <p
+                                className='text-black/55 leading-relaxed'
                                 style={{
-                                    backgroundImage:
-                                        "url(\"data:image/svg+xml;utf8,%3Csvg width='420' height='420' viewBox='0 0 420 420' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='5' stitchTiles='stitch'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E\")",
-                                    backgroundSize: "220px 220px",
+                                    fontFamily:
+                                        "Satoshi, system-ui, sans-serif",
+                                    fontWeight: 400,
+                                    fontSize: "clamp(1.05rem, 1.5vw, 1.3rem)",
                                 }}
+                            >
+                                I'm a Full-Stack Developer passionate about
+                                building modern web applications with Next.js,
+                                TypeScript, React, Node.js, Tailwind CSS,
+                                Prisma, and PostgreSQL. I enjoy learning new
+                                technologies, solving real-world problems, and
+                                creating fast, user-friendly digital
+                                experiences.
+                            </p>
+
+                            <motion.div
+                                className='flex gap-4 pt-2'
+                                initial={{ opacity: 0 }}
+                                animate={sectionInView ? { opacity: 1 } : {}}
+                                transition={{
+                                    duration: 0.6,
+                                    delay: 0.8,
+                                    ease: EASE,
+                                }}
+                            >
+                                <a
+                                    href='https://github.com/khadonnn'
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='text-[0.65rem] tracking-[0.18em] uppercase font-medium text-black/40 hover:text-black border-b border-black/20 hover:border-black pb-px transition-colors'
+                                    style={{
+                                        fontFamily:
+                                            "Satoshi, system-ui, sans-serif",
+                                    }}
+                                >
+                                    GitHub
+                                </a>
+                                <a
+                                    href='https://www.linkedin.com/in/kha-nguyen1301/'
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='text-[0.65rem] tracking-[0.18em] uppercase font-medium text-black/40 hover:text-black border-b border-black/20 hover:border-black pb-px transition-colors'
+                                    style={{
+                                        fontFamily:
+                                            "Satoshi, system-ui, sans-serif",
+                                    }}
+                                >
+                                    LinkedIn
+                                </a>
+                            </motion.div>
+                        </motion.div>
+
+                        {/* Headshot — GSAP clip reveal */}
+                        <div
+                            ref={imageRef}
+                            className='relative aspect-[4/3] w-full overflow-hidden bg-black/15'
+                        >
+                            <Image
+                                src='/me.png'
+                                alt='a photo of Kha Nguyen'
+                                fill
+                                className='object-cover object-top grayscale'
+                                sizes='(max-width: 1024px) 100vw, 50vw'
                             />
+                            <div className='absolute inset-0 mix-blend-multiply bg-white/10' />
                         </div>
                     </div>
                 </div>
@@ -242,58 +448,3 @@ export default function About() {
         </section>
     );
 }
-const TDTCard = () => {
-    return (
-        <div>
-            <img
-                src='/TDT_logo.png'
-                alt='TDTU Logo'
-                className='aspect-3/4 w-full rounded-sm'
-            />
-            <div className='my-4 flex flex-col'>
-                <p className='text-lg font-bold'>TDTU</p>
-                <p className='mt-1 text-xs text-neutral-600 dark:text-neutral-400'>
-                    A well-known university in Vietnam, offering a variety of
-                    programs and degrees.{" "}
-                    <span className='italic'>
-                        Adr: 19 Nguyễn Hữu Thọ, Phường, Quận 7, Thành phố Hồ Chí
-                        Minh
-                    </span>
-                </p>
-            </div>
-        </div>
-    );
-};
-const UITCard = () => {
-    return (
-        <div>
-            <img
-                src='/UIT_logo.jpg'
-                alt='UIT Logo'
-                className='aspect-3/4 w-full rounded-sm'
-            />
-            <div className='my-4 flex flex-col'>
-                <p className='text-lg font-bold'>UIT</p>
-                <p className='mt-1 text-xs text-neutral-600 dark:text-neutral-400'>
-                    University of Information Technology - VNUHCM, specializing
-                    in information technology education and research.{" "}
-                    <span className='italic'>
-                        Adr: P. Linh Xuân, TP. Hồ Chí Minh
-                    </span>
-                </p>
-            </div>
-        </div>
-    );
-};
-
-const FirstDegree = () => {
-    return (
-        <div>
-            <img
-                src='/Certificate.jpg'
-                alt='tdtd certificate'
-                className='w-full h-auto object-cover block'
-            />
-        </div>
-    );
-};

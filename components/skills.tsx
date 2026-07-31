@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import SectionHeading from "./section-heading";
 import { skillsData } from "@/lib/data";
 import { useSectionInView } from "@/lib/hooks";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const fadeInAnimationVariants = {
     initial: {
@@ -21,15 +23,47 @@ const fadeInAnimationVariants = {
 };
 
 export default function Skills() {
-    const { ref } = useSectionInView("Skills");
+    const sectionRef = useRef<HTMLElement | null>(null);
+    const { ref: inViewRef } = useSectionInView("Skills");
+    const sectionInView = useInView(sectionRef, { once: true, margin: "-10%" });
+
+    const setSectionRefs = useCallback(
+        (node: HTMLElement | null) => {
+            sectionRef.current = node;
+            inViewRef(node);
+        },
+        [inViewRef],
+    );
 
     return (
         <section
             id='skills'
-            ref={ref}
+            ref={setSectionRefs}
             className='mb-28 max-w-[53rem] scroll-mt-28 text-center sm:mb-40'
         >
-            <SectionHeading>My skills</SectionHeading>
+            <motion.h2
+                initial={{ opacity: 0, y: 32 }}
+                animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.85, delay: 0.1, ease: EASE }}
+                className='font-black text-left text-gray-950 tracking-tighter leading-[0.88] mb-[clamp(3rem,6vw,7rem)] mt-5 dark:text-gray-50'
+                style={{
+                    fontFamily: "Satoshi, system-ui, sans-serif",
+                    fontWeight: 900,
+                    fontSize: "clamp(3rem, 7vw, 7rem)",
+                }}
+            >
+                My{" "}
+                <span
+                    style={{
+                        fontFamily: "var(--font-instrument), Georgia, serif",
+                        fontStyle: "italic",
+                        fontWeight: 400,
+                    }}
+                    className='text-gray-950/30 dark:text-gray-50/40'
+                >
+                    Skills
+                </span>
+            </motion.h2>
             <ul className='flex flex-wrap justify-center gap-2 text-lg text-gray-800'>
                 {skillsData.map((skill, index) => (
                     <motion.li

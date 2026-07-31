@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import { useSectionInView } from "@/lib/hooks";
 import SectionHeading from "@/components/section-heading";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { certificates } from "@/lib/data";
-
+const EASE = [0.22, 1, 0.36, 1] as const;
 // Wrapper component for scroll animation
 function CertificateCard({
     certificate,
@@ -80,9 +80,19 @@ function CertificateCard({
 }
 
 export function Certificate() {
-    const { ref } = useSectionInView("Certificate");
+    const sectionRef = useRef<HTMLElement | null>(null);
+    const { ref: inViewRef } = useSectionInView("Certificate");
+    const sectionInView = useInView(sectionRef, { once: true, margin: "-10%" });
     const [open, setOpen] = useState(false);
     const [imageSrc, setImageSrc] = useState("");
+
+    const setSectionRefs = useCallback(
+        (node: HTMLElement | null) => {
+            sectionRef.current = node;
+            inViewRef(node);
+        },
+        [inViewRef],
+    );
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -98,13 +108,35 @@ export function Certificate() {
     return (
         <motion.section
             id='certificate'
-            ref={ref}
+            ref={setSectionRefs}
             className='scroll-mt-28'
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.175 }}
         >
-            <SectionHeading>Certificate</SectionHeading>
+            <motion.h2
+                initial={{ opacity: 0, y: 32 }}
+                animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.85, delay: 0.1, ease: EASE }}
+                className='font-black text-gray-950 tracking-tighter leading-[0.88] mb-[clamp(3rem,6vw,7rem)] mt-5 dark:text-gray-50'
+                style={{
+                    fontFamily: "Satoshi, system-ui, sans-serif",
+                    fontWeight: 900,
+                    fontSize: "clamp(3rem, 7vw, 7rem)",
+                }}
+            >
+                My{" "}
+                <span
+                    style={{
+                        fontFamily: "var(--font-instrument), Georgia, serif",
+                        fontStyle: "italic",
+                        fontWeight: 400,
+                    }}
+                    className='text-gray-950/30 dark:text-gray-50/40'
+                >
+                    Certificates
+                </span>
+            </motion.h2>
             <div className='flex justify-center gap-5 flex-wrap pb-24'>
                 {certificates.map((certificate, index) => (
                     <CertificateCard

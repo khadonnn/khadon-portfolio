@@ -22,9 +22,20 @@ import BackgroundBlurs from "@/components/background-blurs";
 import CertificateHoverMenu from "@/components/CertificateHoverMenu";
 import GalaxyHero from "@/components/background/galaxy";
 
+const SITE_URL = "https://www.khadon.io.vn/";
+
+const schemaGraph = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Khadon",
+    url: SITE_URL,
+    sameAs: [SITE_URL],
+};
+
 export const metadata = {
     title: "Khadondev | Personal Portfolio",
     description: "Khadon - Full-Stack Developer",
+    metadataBase: new URL(SITE_URL),
 };
 
 export default function RootLayout({
@@ -37,6 +48,15 @@ export default function RootLayout({
             <body
                 className={`${inter.className} ${pencerio.variable} bg-gray-50 text-gray-950 relative dark:bg-gray-900 dark:text-gray-50 dark:text-opacity-90`}
             >
+                <script
+                    type='application/ld+json'
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(schemaGraph).replace(
+                            /</g,
+                            "\\u003c",
+                        ),
+                    }}
+                />
                 <BackgroundBlurs />
                 <ThemeContextProvider>
                     <GalaxyHero />

@@ -134,8 +134,8 @@ export default function MapLayout({ places }: { places?: Place[] }) {
                     </p>
                 </div>
 
-                <div className='grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)]'>
-                    <aside className='space-y-6'>
+                <div className='grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start'>
+                    <aside className='flex min-h-0 flex-col gap-6 lg:h-[620px]'>
                         <div className='space-y-4 rounded-2xl border border-border/50 bg-card/70 p-4 backdrop-blur-sm'>
                             <p className='text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground'>
                                 Location
@@ -204,7 +204,7 @@ export default function MapLayout({ places }: { places?: Place[] }) {
                             </div>
                         </div>
 
-                        <div className='max-h-[calc(100vh-560px)] space-y-3 overflow-y-auto pr-1 scrollbar-thin'>
+                        <div className='flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-amber-400/40 scrollbar-track-transparent'>
                             {filteredPlaces.map((place) => {
                                 const label = getPlaceLabel(place);
                                 const isActive =
@@ -248,10 +248,10 @@ export default function MapLayout({ places }: { places?: Place[] }) {
                             />
                         </div>
 
-                        <p className='text-sm text-muted-foreground'>
+                        {/* <p className='text-sm text-muted-foreground'>
                             Bấm vào marker màu cam trên bản đồ để xem popup chi
                             tiết địa điểm.
-                        </p>
+                        </p> */}
                     </section>
                 </div>
             </div>
