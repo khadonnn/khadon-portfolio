@@ -183,7 +183,7 @@ export function About() {
             id='about'
             className='w-full bg-white/70 border-t border-black/[0.08] '
         >
-            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] py-[clamp(5rem,10vw,11rem)] radius-tl-[clamp(2rem,5vw,4rem)] radius-tr-[clamp(2rem,5vw,4rem)]'>
+            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] pt-[clamp(5rem,10vw,11rem)]'>
                 {/* Section label */}
                 <div className='flex items-center gap-4 mb-[clamp(2rem,4vw,4rem)]'>
                     <motion.span
@@ -193,7 +193,7 @@ export function About() {
                         className='text-[0.6rem] tracking-[0.22em] uppercase text-black/30 font-medium'
                         style={{ fontFamily: "Satoshi, system-ui, sans-serif" }}
                     >
-                        About
+                        01 / About
                     </motion.span>
                     <div ref={lineRef} className='flex-1 h-px bg-black/10' />
                 </div>
@@ -223,7 +223,9 @@ export function About() {
                         Me
                     </span>
                 </motion.h2>
+            </div>
 
+            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] pb-[clamp(5rem,10vw,11rem)] radius-tl-[clamp(2rem,5vw,4rem)] radius-tr-[clamp(2rem,5vw,4rem)]'>
                 {/* Grid */}
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-[clamp(3rem,6vw,8rem)]'>
                     {/* Left: stats + TECH_STACK */}

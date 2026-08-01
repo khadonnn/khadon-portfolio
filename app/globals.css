@@ -197,14 +197,15 @@ html.dark {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
+    /* Light mode - soft warm gold */
     background: radial-gradient(
         circle,
-        rgba(236, 254, 255, 1) 0%,
-        rgba(100, 116, 139, 0.95) 28%,
-        rgba(71, 85, 105, 0.52) 55%,
-        rgba(71, 85, 105, 0) 72%
+        rgba(255, 251, 235, 1) 0%,
+        rgba(253, 71, 153, 0.9) 28%,
+        rgba(245, 158, 11, 0.35) 55%,
+        rgba(245, 158, 11, 0) 72%
     );
-    box-shadow: 0 0 8px rgba(71, 85, 105, 0.55);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
     animation:
         firefly-drift var(--dur, 5s) ease-in-out infinite var(--delay, 0s),
         firefly-flicker 2.2s ease-in-out infinite;
@@ -212,6 +213,7 @@ html.dark {
 }
 
 .dark .firefly {
+    /* Dark mode - giữ nguyên cyan */
     background: radial-gradient(
         circle,
         rgba(236, 254, 255, 1) 0%,

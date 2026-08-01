@@ -369,7 +369,7 @@ export function Services() {
                 />
             </div>
 
-            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] py-[clamp(5rem,10vw,11rem)]'>
+            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] py-[clamp(2.75rem,5.5vw,6rem)]'>
                 {/* Section label + animated divider */}
                 <div className='flex items-center gap-4 mb-[clamp(3rem,6vw,7rem)]'>
                     <motion.span

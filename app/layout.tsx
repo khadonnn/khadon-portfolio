@@ -60,7 +60,6 @@ export default function RootLayout({
                 <BackgroundBlurs />
                 <ThemeContextProvider>
                     <GalaxyHero />
-
                     <LoadingProvider videoSrc='/assets/video_bg/galaxy.mp4'>
                         <ActiveSectionContextProvider>
                             <Header />

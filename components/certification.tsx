@@ -4,7 +4,6 @@ import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import { useSectionInView } from "@/lib/hooks";
-import SectionHeading from "@/components/section-heading";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { certificates } from "@/lib/data";
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -81,6 +80,7 @@ function CertificateCard({
 
 export function Certificate() {
     const sectionRef = useRef<HTMLElement | null>(null);
+    const lineRef = useRef<HTMLDivElement>(null);
     const { ref: inViewRef } = useSectionInView("Certificate");
     const sectionInView = useInView(sectionRef, { once: true, margin: "-10%" });
     const [open, setOpen] = useState(false);
@@ -109,43 +109,60 @@ export function Certificate() {
         <motion.section
             id='certificate'
             ref={setSectionRefs}
-            className='scroll-mt-28'
+            className='w-full scroll-mt-20 mb-20 sm:mb-28'
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.175 }}
         >
-            <motion.h2
-                initial={{ opacity: 0, y: 32 }}
-                animate={sectionInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.85, delay: 0.1, ease: EASE }}
-                className='font-black text-gray-950 tracking-tighter leading-[0.88] mb-[clamp(3rem,6vw,7rem)] mt-5 dark:text-gray-50'
-                style={{
-                    fontFamily: "Satoshi, system-ui, sans-serif",
-                    fontWeight: 900,
-                    fontSize: "clamp(3rem, 7vw, 7rem)",
-                }}
-            >
-                My{" "}
-                <span
+            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] py-[clamp(2.75rem,5.5vw,6rem)]'>
+                {/* Section label */}
+                <div className='flex items-center gap-4 mb-[clamp(2rem,4vw,4rem)]'>
+                    <motion.span
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={sectionInView ? { opacity: 1, x: 0 } : {}}
+                        transition={{ duration: 0.6, ease: EASE }}
+                        className='text-[0.6rem] tracking-[0.22em] uppercase text-black/30 font-medium'
+                        style={{ fontFamily: "Satoshi, system-ui, sans-serif" }}
+                    >
+                        02 / Certificates
+                    </motion.span>
+                    <div ref={lineRef} className='flex-1 h-px bg-black/10' />
+                </div>
+
+                <motion.h2
+                    initial={{ opacity: 0, y: 32 }}
+                    animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.85, delay: 0.1, ease: EASE }}
+                    className='font-black text-black tracking-tighter leading-[0.88] mb-[clamp(3rem,6vw,7rem)] dark:text-gray-50'
                     style={{
-                        fontFamily: "var(--font-instrument), Georgia, serif",
-                        fontStyle: "italic",
-                        fontWeight: 400,
+                        fontFamily: "Satoshi, system-ui, sans-serif",
+                        fontWeight: 900,
+                        fontSize: "clamp(3rem, 7vw, 7rem)",
                     }}
-                    className='text-gray-950/30 dark:text-gray-50/40'
                 >
-                    Certificates
-                </span>
-            </motion.h2>
-            <div className='flex justify-center gap-5 flex-wrap pb-24'>
-                {certificates.map((certificate, index) => (
-                    <CertificateCard
-                        key={index}
-                        certificate={certificate}
-                        index={index}
-                        onOpenModal={handleOpenModal}
-                    />
-                ))}
+                    My{" "}
+                    <span
+                        style={{
+                            fontFamily:
+                                "var(--font-instrument), Georgia, serif",
+                            fontStyle: "italic",
+                            fontWeight: 400,
+                        }}
+                        className='text-gray-950/30 dark:text-gray-50/40'
+                    >
+                        Certificates
+                    </span>
+                </motion.h2>
+                <div className='flex justify-center gap-5 flex-wrap pb-24'>
+                    {certificates.map((certificate, index) => (
+                        <CertificateCard
+                            key={index}
+                            certificate={certificate}
+                            index={index}
+                            onOpenModal={handleOpenModal}
+                        />
+                    ))}
+                </div>
             </div>
 
             {open && (
