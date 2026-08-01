@@ -121,12 +121,15 @@ export function Certificate() {
                         initial={{ opacity: 0, x: -12 }}
                         animate={sectionInView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.6, ease: EASE }}
-                        className='text-[0.6rem] tracking-[0.22em] uppercase text-black/30 font-medium'
+                        className='text-[0.6rem] tracking-[0.22em] uppercase text-black/30 dark:text-white/40 font-medium'
                         style={{ fontFamily: "Satoshi, system-ui, sans-serif" }}
                     >
                         02 / Certificates
                     </motion.span>
-                    <div ref={lineRef} className='flex-1 h-px bg-black/10' />
+                    <div
+                        ref={lineRef}
+                        className='flex-1 h-px bg-black/10 dark:bg-white/10'
+                    />
                 </div>
 
                 <motion.h2
