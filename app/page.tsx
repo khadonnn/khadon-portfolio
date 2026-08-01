@@ -13,7 +13,7 @@ import { useIsDesktop } from "@/lib/useIsDesktop";
 import MapLayout from "@/components/map-layout";
 import { Services } from "@/components/Services";
 import { SmoothScroll } from "@/lib/SmoothScroll";
-import { About } from "@/components/About";
+import { About } from "@/components/about-me";
 
 export default function Home() {
     const isDesktop = useIsDesktop();
