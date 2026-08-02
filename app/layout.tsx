@@ -60,8 +60,8 @@ export default function RootLayout({
                 <BackgroundBlurs />
                 <ThemeContextProvider>
                     <GalaxyHero />
-                    <LoadingProvider videoSrc='/assets/video_bg/galaxy.mp4'>
-                        <ActiveSectionContextProvider>
+                    <ActiveSectionContextProvider>
+                        <LoadingProvider videoSrc='/assets/video_bg/galaxy.mp4'>
                             <Header />
                             <div className='pt-20 sm:pt-24 flex-grow'>
                                 {children}
@@ -70,8 +70,8 @@ export default function RootLayout({
                             <Toaster position='top-right' />
                             <ThemeSwitch />
                             <CertificateHoverMenu />
-                        </ActiveSectionContextProvider>
-                    </LoadingProvider>
+                        </LoadingProvider>
+                    </ActiveSectionContextProvider>
                 </ThemeContextProvider>
             </body>
         </html>

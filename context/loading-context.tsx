@@ -14,6 +14,7 @@ import SplitType from "split-type";
 
 type LoadingContextType = {
     isReady: boolean;
+    isContentVisible: boolean;
     loadProgress: number;
     loadError: boolean;
     setIsReady: (value: boolean) => void;
@@ -33,6 +34,7 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
     const [loadProgressValue, setLoadProgressValue] = useState(0);
     const [loadError, setLoadError] = useState(false);
     const [isUnmounted, setIsUnmounted] = useState(false);
+    const [windowLoaded, setWindowLoaded] = useState(false);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const hasCompletedLoad = useRef(false);
     const isProgressLocked = useRef(false);
@@ -66,10 +68,43 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         }
     }, [isCertificatePage]);
 
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const handleWindowLoad = () => {
+            setWindowLoaded(true);
+        };
+
+        if (document.readyState === "complete") {
+            setWindowLoaded(true);
+            return;
+        }
+
+        window.addEventListener("load", handleWindowLoad, { once: true });
+
+        return () => {
+            window.removeEventListener("load", handleWindowLoad);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!windowLoaded) return;
+
+        if (document.fonts?.ready) {
+            document.fonts.ready
+                .then(() => {
+                    setWindowLoaded(true);
+                })
+                .catch(() => {
+                    setWindowLoaded(true);
+                });
+        }
+    }, [windowLoaded]);
+
     // ====================== TIẾN TRÌNH THÔNG MINH (CHỐNG GIẬT LÙI) ======================
     useEffect(() => {
         if (!videoSrc || isCertificatePage) {
-            if (!isCertificatePage) setIsReady(true);
+            if (!isCertificatePage && windowLoaded) setIsReady(true);
             return;
         }
         if (hasCompletedLoad.current) return; // Ngăn chặn việc load lại video khi component re-render
@@ -109,7 +144,9 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         };
 
         finishTimeoutRef.current = setTimeout(() => {
-            finishLoading();
+            if (windowLoaded) {
+                finishLoading();
+            }
         }, 1200);
 
         const handleVideoError = () => {
@@ -123,6 +160,10 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         video.src = videoSrc;
         video.load();
 
+        if (windowLoaded) {
+            finishLoading();
+        }
+
         return () => {
             if (progressIntervalRef.current)
                 clearInterval(progressIntervalRef.current);
@@ -130,7 +171,7 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
                 clearTimeout(finishTimeoutRef.current);
             video.removeEventListener("error", handleVideoError);
         };
-    }, [videoSrc, isCertificatePage]);
+    }, [videoSrc, isCertificatePage, windowLoaded]);
 
     // ====================== GSAP ANIMATION ======================
     useEffect(() => {
@@ -196,19 +237,6 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
                 { opacity: 0, scale: 0.98, duration: 0.9, ease: "power3.out" },
                 "-=0.5",
             );
-
-            const mainContent = document.querySelector(
-                ".main-content-wrapper",
-            ) as HTMLElement;
-            if (mainContent) {
-                // ĐÃ FIX: Gỡ bỏ y: 80 để không làm hỏng các nút position: fixed (như Theme Switch)
-                tl.fromTo(
-                    mainContent,
-                    { autoAlpha: 0 },
-                    { autoAlpha: 1, duration: 1.2, ease: "power2.out" },
-                    "-=0.6",
-                );
-            }
         });
 
         return () => ctx.revert();
@@ -218,6 +246,7 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
         <LoadingContext.Provider
             value={{
                 isReady,
+                isContentVisible: isCertificatePage || isUnmounted,
                 loadProgress: loadProgressValue,
                 loadError,
                 setIsReady,
@@ -229,8 +258,8 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
             <div
                 className={`main-content-wrapper w-full min-h-screen relative z-10 ${
                     isCertificatePage || isUnmounted
-                        ? "opacity-100 visible"
-                        : "opacity-0 invisible"
+                        ? "opacity-100"
+                        : "pointer-events-none"
                 }`}
             >
                 {children}

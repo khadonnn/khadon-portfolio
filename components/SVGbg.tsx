@@ -75,13 +75,12 @@ const SVGbg = () => {
                 const isMobile = window.innerWidth < 768;
                 gsap.to(path, {
                     strokeDashoffset: 0,
-                    ease: "none",
+                    ease: "power1.out",
                     scrollTrigger: {
-                        id: "svg-bg-draw",
                         trigger: triggerEl,
-                        start: isMobile ? "top 70%" : "top 60%",
-                        end: isMobile ? "bottom 70%" : "bottom 80%",
-                        scrub: isMobile ? 1 : 1, // Set to 1 for both to check
+                        start: "top 90%",
+                        end: "bottom 40%",
+                        scrub: 0.4,
                         invalidateOnRefresh: true,
                     },
                 });

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import React from "react";
-import { motion } from "framer-motion";
 import { BsArrowRight, BsLinkedin } from "react-icons/bs";
 import { HiDownload } from "react-icons/hi";
 import { FaGithubSquare } from "react-icons/fa";
@@ -44,46 +43,11 @@ const Intro = () => {
         >
             <div className='flex items-center justify-center py-10'>
                 <div className='relative w-max'>
-                    <motion.span
-                        className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-500 dark:text-gray-400 z-20 whitespace-nowrap pointer-events-none'
-                        style={{ transformOrigin: "top left" }}
-                        initial={{
-                            opacity: 0,
-                            scale: 0.6,
-                            x: 8,
-                            y: -6,
-                            rotate: -12,
-                            skewX: "-8deg",
-                        }}
-                        animate={{
-                            opacity: 1,
-                            scale: 1,
-                            x: 0,
-                            y: 0,
-                            rotate: -12,
-                            skewX: "-8deg",
-                        }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 125,
-                            delay: 0.2,
-                            duration: 0.7,
-                        }}
-                    >
+                    <span className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-500 dark:text-gray-400 z-20 whitespace-nowrap pointer-events-none'>
                         KhaDonDev
-                    </motion.span>
+                    </span>
 
-                    <motion.div
-                        className='relative z-10'
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 260,
-                            damping: 20,
-                            duration: 0.8,
-                        }}
-                    >
+                    <div className='relative z-10'>
                         <Image
                             src={"/avt4.png"}
                             alt='khadon'
@@ -93,29 +57,15 @@ const Intro = () => {
                             priority={true}
                             className='h-28 w-28 rounded-full object-cover border-[0.30rem] border-white shadow-xl dark:border-gray-800 dark:bg-gray-50 dark:bg-opacity-10'
                         />
-                    </motion.div>
+                    </div>
 
-                    <motion.span
-                        className='text-4xl absolute bottom-0 right-0 z-20'
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 125,
-                            delay: 0.1,
-                            duration: 0.7,
-                        }}
-                    >
+                    <span className='text-4xl absolute bottom-0 right-0 z-20'>
                         👋
-                    </motion.span>
+                    </span>
                 </div>
             </div>
 
-            <motion.h2
-                className='mb-10 mt-4 px-4 text-xl font-medium !leading-[1.5] sm:text-3xl '
-                initial={{ opacity: 0, y: 100 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
+            <h2 className='mb-10 mt-4 px-4 text-xl font-medium !leading-[1.5] sm:text-3xl '>
                 <b>Hi, I'm Khadondev.</b> A{" "}
                 <b>self-taught Full-stack Developer</b> with 8 months of
                 hands-on experience, passionate about building <i>web & apps</i>
@@ -128,16 +78,9 @@ const Intro = () => {
                     </strong>{" "}
                 </span>
                 <br />
-            </motion.h2>
+            </h2>
 
-            <motion.div
-                className='flex flex-col sm:flex-row items-center justify-center gap-4 px-4 text-lg font-medium'
-                initial={{ opacity: 0, y: 100 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                    delay: 0.1,
-                }}
-            >
+            <div className='flex flex-col sm:flex-row items-center justify-center gap-4 px-4 text-lg font-medium'>
                 {/* Nút Contact Me */}
                 <ButtonGsap
                     onClick={handleContactClick}
@@ -183,7 +126,7 @@ const Intro = () => {
                         <FaGithubSquare size={23} />
                     </a>
                 </div>
-            </motion.div>
+            </div>
         </section>
     );
 };
