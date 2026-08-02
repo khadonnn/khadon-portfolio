@@ -109,7 +109,7 @@ export function Certificate() {
         <motion.section
             id='certificate'
             ref={setSectionRefs}
-            className='w-full scroll-mt-20 mb-20 sm:mb-28'
+            className='w-full scroll-mt-20'
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.175 }}

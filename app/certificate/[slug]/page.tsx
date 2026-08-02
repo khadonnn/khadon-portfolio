@@ -19,7 +19,7 @@ export default function CertificateDetail({ params }: PageProps) {
             <div className='relative w-full max-w-5xl'>
                 <a
                     href='/'
-                    className='absolute top-0 left-0 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg text-gray-900 dark:text-white text-lg hover:bg-gray-100 dark:hover:bg-gray-700 z-10 flex items-center gap-2 transition-colors'
+                    className='mt-20 absolute top-0 left-0 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg text-gray-900 dark:text-white text-lg hover:bg-gray-100 dark:hover:bg-gray-700 z-10 flex items-center gap-2 transition-colors'
                 >
                     <BsArrowLeft />
                     <span className='text-sm font-medium'>Back</span>

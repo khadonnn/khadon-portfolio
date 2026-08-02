@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Place, getPlaceLabel } from "../types/place-types";
 
 interface MapProps {
@@ -57,6 +57,7 @@ export default function MapComponent({
     const mapRef = useRef<HTMLDivElement | null>(null);
     const leafletMapRef = useRef<any>(null);
     const markersRef = useRef<Record<string, any>>({});
+    const [isInteractive, setIsInteractive] = useState(false);
 
     useEffect(() => {
         if (!mapRef.current) return;
@@ -72,6 +73,7 @@ export default function MapComponent({
 
         let map: any = null;
         let cancelled = false;
+        let cleanupTouchListeners = () => {};
 
         // Dynamically import Leaflet only on the client
         import("leaflet")
@@ -93,6 +95,42 @@ export default function MapComponent({
                     center,
                     zoom,
                 );
+
+                const setInteractionState = (enabled: boolean) => {
+                    if (!map?.dragging) return;
+
+                    if (enabled) {
+                        map.dragging.enable();
+                        map.touchZoom?.enable?.();
+                        map.doubleClickZoom?.enable?.();
+                        map.scrollWheelZoom?.enable?.();
+                        map.boxZoom?.enable?.();
+                        map.keyboard?.enable?.();
+                    } else {
+                        map.dragging.disable();
+                        map.touchZoom?.disable?.();
+                        map.doubleClickZoom?.disable?.();
+                        map.scrollWheelZoom?.disable?.();
+                        map.boxZoom?.disable?.();
+                        map.keyboard?.disable?.();
+                    }
+
+                    setIsInteractive(enabled);
+                };
+
+                setInteractionState(false);
+
+                const mapContainer = map.getContainer();
+
+                const handleActivate = () => {
+                    setInteractionState(true);
+                };
+
+                cleanupTouchListeners = () => {
+                    mapContainer.removeEventListener("click", handleActivate);
+                };
+
+                mapContainer.addEventListener("click", handleActivate);
 
                 L.tileLayer(
                     "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
@@ -246,6 +284,7 @@ export default function MapComponent({
 
         return () => {
             cancelled = true;
+            cleanupTouchListeners();
             if (map) {
                 try {
                     map.remove();
@@ -282,14 +321,42 @@ export default function MapComponent({
     }, [selected]);
 
     return (
-        <div
-            ref={mapRef}
-            style={{
-                height: "100vh",
-                width: "100%",
-                zIndex: 1,
-                ...(style || {}),
-            }}
-        />
+        <div className='relative h-full w-full'>
+            {!isInteractive && (
+                <button
+                    type='button'
+                    onClick={() => setIsInteractive(true)}
+                    className='absolute inset-0 z-[3] flex items-center justify-center bg-black/10 px-4 text-center backdrop-blur-[1px]'
+                    aria-label='Activate map interactions'
+                >
+                    <span className='rounded-2xl border border-white/20 bg-black/80 px-4 py-3 text-xs font-medium tracking-[0.18em] text-white shadow-lg backdrop-blur-md'>
+                        Bấm vào bản đồ để xem
+                    </span>
+                </button>
+            )}
+
+            {isInteractive && (
+                <button
+                    type='button'
+                    onClick={() => setIsInteractive(false)}
+                    className='absolute right-3 top-3 z-[4] rounded-full border border-white/20 bg-red-500/70 px-3 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:bg-black/85'
+                    aria-label='Thoát chế độ tương tác bản đồ'
+                >
+                    X
+                </button>
+            )}
+
+            <div
+                ref={mapRef}
+                style={{
+                    height: "100vh",
+                    width: "100%",
+                    zIndex: 1,
+                    pointerEvents: isInteractive ? "auto" : "none",
+                    touchAction: isInteractive ? "none" : "pan-y",
+                    ...(style || {}),
+                }}
+            />
+        </div>
     );
 }

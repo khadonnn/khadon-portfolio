@@ -31,7 +31,7 @@ export default function Experience() {
         <section
             id='experience'
             ref={setSectionRefs}
-            className='w-full scroll-mt-20 mb-20 sm:mb-28'
+            className='w-full scroll-mt-20'
         >
             <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] py-[clamp(2.75rem,5.5vw,6rem)]'>
                 {/* Section label */}
