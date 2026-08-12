@@ -44,7 +44,24 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang='en' className='!scroll-smooth'>
+        <html lang='en' className='!scroll-smooth dark'>
+            <head>
+                {/* FOUC guard: áp dụng theme trước khi paint.
+                    Mặc định DARK; chỉ bỏ class 'dark' nếu user đã lưu 'light'. */}
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `(function(){
+                            try{
+                                var t = localStorage.getItem('theme');
+                                if (t === 'light') document.documentElement.classList.remove('dark');
+                                else document.documentElement.classList.add('dark');
+                            }catch(e){
+                                document.documentElement.classList.add('dark');
+                            }
+                        })();`,
+                    }}
+                />
+            </head>
             <body
                 className={`${inter.className} ${pencerio.variable} bg-gray-50 text-gray-950 relative dark:bg-gray-900 dark:text-gray-50 dark:text-opacity-90`}
             >

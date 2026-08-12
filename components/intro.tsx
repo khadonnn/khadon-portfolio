@@ -43,7 +43,13 @@ const Intro = () => {
         >
             <div className='flex items-center justify-center py-10'>
                 <div className='relative w-max'>
-                    <span className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-500 dark:text-gray-100 z-20 whitespace-nowrap pointer-events-none rotate-[-35deg] -ml-16 -mb-16'>
+                    <span
+                        className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-900 dark:text-gray-100 z-20 whitespace-nowrap pointer-events-none rotate-[-35deg] -ml-16 -mb-16'
+                        style={{
+                            textShadow:
+                                "0.1px 0 0 currentColor, -0.1px 0 0 currentColor",
+                        }}
+                    >
                         KhaDonDev
                     </span>
 

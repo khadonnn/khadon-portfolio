@@ -19,6 +19,7 @@ export default function HeroScrollAnimation({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
 
     const { theme } = useTheme();
     const isLight = theme === "light";
@@ -63,20 +64,24 @@ export default function HeroScrollAnimation({
         const isMobile = window.innerWidth < 768;
 
         const setCanvasSize = () => {
-            // Giới hạn dpr = 1.5 trên mobile để giảm nóng máy
-            const dpr = Math.min(
-                window.devicePixelRatio || 1,
-                isMobile ? 1.5 : 2,
-            );
+            // FIX #4 (performance): Giới hạn dpr để giảm tải cho drawImage.
+            // Render canvas ở độ phân giải thấp hơn (dpr 1) rồi để CSS scale lên
+            // lớn hơn rất nhiều so với render full dpr (desktop dpr 2 = ~4x phí).
+            // Nguyên nhân lag: mỗi frame scroll đều vẽ lại ảnh fullscreen + smooth
+            // "high" trên canvas ~3840px rộng => giảm dpr giúp scroll mượt lại.
+            const dpr = Math.min(window.devicePixelRatio || 1, 1);
             const displayWidth = window.innerWidth;
             const displayHeight = window.innerHeight;
 
             canvas.width = displayWidth * dpr;
             canvas.height = displayHeight * dpr;
 
-            // CSS size
-            canvas.style.width = `${displayWidth}px`;
-            canvas.style.height = `${displayHeight}px`;
+            // FIX #8 (h-full): KHÔNG set CSS width/height nữa -> canvas dùng
+            // class `w-full h-full` = 100% của wrapper (100dvh), khớp đúng với
+            // overlay. Trước đây set theo window.innerHeight (px) nên nếu 100dvh
+            // khác innerHeight (thanh địa chỉ mobile) thì canvas lệch chiều cao
+            // với overlay, gây cảm giác overlay không full.
+            // context không cần scale theo dpr (dpr = 1).
 
             context.setTransform(1, 0, 0, 1, 0, 0);
             context.scale(dpr, dpr);
@@ -188,15 +193,11 @@ export default function HeroScrollAnimation({
             const y = (displayHeight - img.height * scale) / 2;
 
             context.imageSmoothingEnabled = true;
-            context.imageSmoothingQuality = "high";
+            // FIX #4 (performance): "high" rất tốn CPU/GPU khi vẽ ảnh fullscreen
+            // từng frame. "medium" cân bằng chất lượng & tốc độ => scroll mượt hơn.
+            context.imageSmoothingQuality = "medium";
 
-            context.drawImage(
-                img,
-                x,
-                y,
-                img.width * scale,
-                img.height * scale,
-            );
+            context.drawImage(img, x, y, img.width * scale, img.height * scale);
         };
 
         // ... Khởi tạo ảnh (Phần này giữ nguyên logic của bạn) ...
@@ -229,7 +230,7 @@ export default function HeroScrollAnimation({
                     id: "hero-scroll-animation",
                     trigger: container,
                     start: "top top",
-                    end: "+=2500",
+                    end: "+=2200",
                     scrub: 0.3,
                     pin: true,
                     // anticipiatePin giúp giảm giật trên mobile
@@ -242,10 +243,11 @@ export default function HeroScrollAnimation({
             // Refresh để tính toán lại vị trí start/end
             ScrollTrigger.refresh();
 
-            // Timeline UI/UX (tổng duration 10):
-            //   0% - 85% : chuỗi ảnh chạy trên canvas (nền hero luôn hiển thị ngay từ load)
+            // Timeline UI/UX (pin 2200px):
+            //   0% - 85% : chuỗi ảnh chạy trên canvas (nền hero hiển thị từ lúc load)
             //  15% - 25% : Intro fade-out + di chuyển lên (y: -80) để lộ cảnh
-            //  85% -100% : canvas fade-out sang section kế tiếp
+            //  85% -100% : frame cuối giữ nguyên (OPACITY VẪN 1 — không fade-out)
+            //              tới khi hết pin thì About trượt lên thay thế.
             // FIX #3: Intro không fade-in nữa (sẵn opacity: 1, y: 0) mà chỉ fade-out khi scroll.
             tl.to(
                 animationState,
@@ -263,11 +265,23 @@ export default function HeroScrollAnimation({
                 { opacity: 0, y: -80, duration: 1, ease: "power2.in" },
                 1.5,
             );
-            tl.to(
-                canvas,
-                { opacity: 0, duration: 1.5, ease: "power2.in" },
-                8.5,
-            );
+            // FIX #6: Intro ẩn đi thì lớp phủ cũng fade-out theo (cùng vị trí 1.5),
+            // phần snow canvas sau đó hiển thị sạch, không cần overlay nữa.
+            if (overlayRef.current) {
+                tl.to(
+                    overlayRef.current,
+                    { opacity: 0, duration: 1, ease: "power2.in" },
+                    1.5,
+                );
+            }
+            // GÓP Ý (đã áp dụng): XÓA fade-out container ở cuối timeline
+            // => canvas giữ nguyên opacity 1 tới khi hết pin, không còn tạo
+            // khoảng trống "đen/trống" giữa hero và About.
+            // tl.to(
+            //     container,
+            //     { opacity: 0, duration: 0.6, ease: "power2.in" },
+            //     9.4,
+            // );
         }
 
         const handleResize = () => {
@@ -295,47 +309,65 @@ export default function HeroScrollAnimation({
     }, [isLight]);
 
     return (
-        <section
-            ref={containerRef}
-            // FIX #1: Full-bleed tới đỉnh viewport (light mode). -mt đối trọng với
-            // pt-20 sm:pt-24 của layout wrapper để không còn "hở" phía trên.
-            className={`relative w-full overflow-hidden ${
-                isLight ? "-mt-20 sm:-mt-24" : ""
-            }`}
-            style={isLight ? { height: "100dvh" } : undefined}
-        >
-            {/* Chỉ hiển thị canvas làm background trong LIGHT MODE */}
-            {isLight && (
-                <div className='absolute inset-0 w-full h-full'>
-                    {/* FIX #2: Bỏ filter blur khỏi canvas để ảnh sắc nét.
-                        opacity: 1 để nền ảnh (chuỗi scroll) hiển thị ngay khi load */}
-                    <canvas
-                        ref={canvasRef}
-                        className='w-full h-full object-cover'
-                        style={{
-                            pointerEvents: "none",
-                            opacity: 1,
-                            willChange: "opacity, transform",
-                            transform: "translateZ(0)",
-                        }}
-                    />
-                </div>
-            )}
-
-            {/* FIX #2: Gradient overlay dùng GPU (Tailwind) thay cho drawImage gradient trong render loop */}
-            {isLight && (
-                <div className='pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-white/60 via-transparent to-white/80 dark:from-neutral-950/60 dark:via-transparent dark:to-neutral-950/80' />
-            )}
-
-            {/* FIX #3: Intro hiện đầy đủ ngay khi load (opacity: 1, y:0), chỉ fade-out khi scroll */}
+        // FIX #7 (hết gap dưới hero): -mt đặt trên wrapper NGOÀI, còn phần tử
+        // được pin (containerRef) là div bên trong. Nhờ vậy top của phần tử pin
+        // trùng với top của pin-spacer => hết lệch ~96px khi kết thúc pin,
+        // About liền ngay theo, không còn khoảng trống cuộn thừa.
+        <section className={isLight ? "-mt-20 sm:-mt-24" : ""}>
             <div
-                ref={textRef}
-                className={`${
-                    isLight ? "absolute inset-0" : "relative"
-                } z-20 flex w-full items-center justify-center px-4`}
-                style={{ opacity: 1 }}
+                ref={containerRef}
+                className={`relative w-full overflow-hidden ${
+                    isLight
+                        ? "h-[calc(100vh+5rem)] sm:h-[calc(100vh+6rem)]"
+                        : ""
+                }`}
             >
-                {children}
+                {/* Chỉ hiển thị canvas làm background trong LIGHT MODE */}
+                {isLight && (
+                    <div className='absolute inset-0 h-full w-full'>
+                        {/* FIX #2: Bỏ filter blur khỏi canvas để ảnh sắc nét.
+                        opacity: 1 để nền ảnh (chuỗi scroll) hiển thị ngay khi load */}
+                        <canvas
+                            ref={canvasRef}
+                            className='h-full w-full object-cover'
+                            style={{
+                                pointerEvents: "none",
+                                opacity: 1,
+                                // FIX #4 (performance): bỏ willChange + translateZ(0).
+                                // Canvas bị vẽ lại mỗi frame scroll; ép nó thành layer
+                                // GPU riêng (promoted) khiến mỗi lần vẽ phải upload texture
+                                // lên GPU => thêm 1 bước tốn phí, gây giật. Để canvas
+                                // repaint bình thường sẽ mượt hơn.
+                            }}
+                        />
+                    </div>
+                )}
+
+                {/* FIX #2: Overlay gradient (GPU, Tailwind) thay cho drawImage trong render.
+                FIX #5: Tăng độ đậm overlay + thêm radial scrim ở giữa để Intro
+                đọc rõ hơn trên nền ảnh snow bright. */}
+                {isLight && (
+                    <div
+                        className='pointer-events-none absolute inset-0 z-10 h-full w-full'
+                        ref={overlayRef}
+                    >
+                        {/* Gradient xám lạnh nhẹ */}
+                        <div className='absolute inset-0 h-full w-full bg-gradient-to-b from-slate-200/70 via-blue-50/20 to-slate-200/80' />
+                        {/* Scrim xám ngay tâm để chữ tối màu đọc rõ hơn */}
+                        <div className='absolute inset-0 h-full w-full [background:radial-gradient(ellipse_55%_60%_at_center,rgba(226,232,240,0.65),transparent_70%)]' />
+                    </div>
+                )}
+
+                {/* FIX #3: Intro hiện đầy đủ ngay khi load (opacity: 1, y:0), chỉ fade-out khi scroll */}
+                <div
+                    ref={textRef}
+                    className={`${
+                        isLight ? "absolute inset-0" : "relative"
+                    } z-20 flex w-full items-center justify-center px-4`}
+                    style={{ opacity: 1 }}
+                >
+                    {children}
+                </div>
             </div>
         </section>
     );
