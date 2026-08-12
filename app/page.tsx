@@ -19,10 +19,11 @@ export default function Home() {
     const isDesktop = useIsDesktop();
     return (
         <>
-            <header className='relative flex flex-col items-center px-4'>
-                <Intro />
-            </header>
-            <ScrollAnimation />
+            <ScrollAnimation>
+                <header className='relative z-20 flex w-full flex-col items-center px-4'>
+                    <Intro />
+                </header>
+            </ScrollAnimation>
             {/* <QuoteSection /> */}
             <SmoothScroll>
                 <main className='relative flex flex-col items-center px-4 w-full overflow-hidden'>

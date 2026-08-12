@@ -330,7 +330,7 @@ export default function MapComponent({
                     aria-label='Activate map interactions'
                 >
                     <span className='rounded-2xl border border-white/20 bg-black/80 px-4 py-3 text-xs font-medium tracking-[0.18em] text-white shadow-lg backdrop-blur-md'>
-                        Bấm vào bản đồ để xem
+                        Click to view
                     </span>
                 </button>
             )}

@@ -1,19 +1,27 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLoading } from "@/context/loading-context";
+import { useTheme } from "@/context/theme-context";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // Chỉ bật normalizeScroll nếu thực sự cần thiết, đôi khi nó gây conflict cuộn trên mobile
 // ScrollTrigger.normalizeScroll(true);
 
-export default function HeroScrollAnimation() {
+export default function HeroScrollAnimation({
+    children,
+}: {
+    children?: ReactNode;
+}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
+
+    const { theme } = useTheme();
+    const isLight = theme === "light";
 
     const { setIsReady, setLoadProgress, setLoadError } = useLoading();
 
@@ -29,12 +37,26 @@ export default function HeroScrollAnimation() {
 
         if (!canvas || !container || !textElement) return;
 
+        // Chỉ chạy hiệu ứng scroll ảnh làm background trong LIGHT MODE.
+        // Dark mode vẫn hiển thị Intro nhưng không pin ảnh (giữ galaxy nền).
+        if (!isLight) {
+            ScrollTrigger.getAll().forEach(
+                (t) => t.trigger === container && t.kill(),
+            );
+            return;
+        }
+
         const context = canvas.getContext("2d", { alpha: false });
         if (!context) return;
 
-        const frameCount = 120;
+        // Số frame thực tế trên disk: ezgif-frame-017.png ... ezgif-frame-120.png (104 frame)
+        const frameCount = 104;
+        const FRAME_OFFSET = 16; // index 1 -> file 017
         const currentFrame = (index: number) =>
-            `/assets/snow/ezgif-frame-${String(index).padStart(3, "0")}.png`;
+            `/assets/snow/ezgif-frame-${String(index + FRAME_OFFSET).padStart(
+                3,
+                "0",
+            )}.png`;
 
         // --- CẤU HÌNH MOBILE ---
         // Kiểm tra mobile để tối ưu
@@ -129,97 +151,52 @@ export default function HeroScrollAnimation() {
         };
         // --- LOGIC LOADING END ---
 
-        // --- RENDER FIX CHO MOBILE ---
-        let renderScheduled = false;
+        // --- RENDER (tối ưu) ---
+        // FIX #2: Bỏ requestAnimationFrame lồng nhau (GSAP tự chạy frame loop).
+        // Bỏ hoàn toàn createRadialGradient + fillRect trong vòng render để ảnh
+        // không bị "muddy" và giảm tải CPU/GPU. Gradient chuyển sang HTML div overlay.
         const render = () => {
-            if (renderScheduled) return;
-            renderScheduled = true;
-            requestAnimationFrame(() => {
-                renderScheduled = false;
+            let frameIndex = Math.min(
+                Math.floor(animationState.frame),
+                frameCount - 1,
+            );
+            let img = images[frameIndex];
 
-                let frameIndex = Math.min(
-                    Math.floor(animationState.frame),
-                    frameCount - 1,
-                );
-                let img = images[frameIndex];
+            // Fallback nếu ảnh lỗi
+            let attempts = 0;
+            while (
+                (!img || !img.complete || img.naturalWidth === 0) &&
+                attempts < 10
+            ) {
+                frameIndex = Math.max(0, frameIndex - 1);
+                img = images[frameIndex];
+                attempts++;
+            }
 
-                // Fallback nếu ảnh lỗi
-                let attempts = 0;
-                while (
-                    (!img || !img.complete || img.naturalWidth === 0) &&
-                    attempts < 10
-                ) {
-                    frameIndex = Math.max(0, frameIndex - 1);
-                    img = images[frameIndex];
-                    attempts++;
-                }
+            if (!img || !img.complete || img.naturalWidth === 0) return;
 
-                if (!img || !img.complete || img.naturalWidth === 0) return;
+            const displayWidth = window.innerWidth;
+            const displayHeight = window.innerHeight;
+            context.clearRect(0, 0, displayWidth, displayHeight);
 
-                const displayWidth = window.innerWidth;
-                const displayHeight = window.innerHeight;
-                context.clearRect(0, 0, displayWidth, displayHeight);
+            // "cover": lấp đầy màn hình, căn giữa
+            const scale = Math.max(
+                displayWidth / img.width,
+                displayHeight / img.height,
+            );
+            const x = (displayWidth - img.width * scale) / 2;
+            const y = (displayHeight - img.height * scale) / 2;
 
-                // --- LOGIC SCALE QUAN TRỌNG ---
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = "high";
 
-                // Cách 1: "cover" (Mặc định) - Lấp đầy màn hình, chấp nhận mất hình
-                // Cách 2: "contain" - Hiển thị toàn bộ hình, có khoảng đen
-                // Cách 3: "hybrid" - Trên mobile zoom out một chút để thấy nhiều hơn
-
-                let scale;
-                const imgRatio = img.width / img.height;
-                const screenRatio = displayWidth / displayHeight;
-
-                // Logic này giúp mobile (màn hình dọc) hiển thị được nhiều nội dung ngang hơn 1 chút
-                // so với mặc định, bằng cách cho phép ảnh nhỏ hơn height màn hình 1 chút nếu cần
-                // hoặc bạn có thể giữ nguyên Math.max để fill toàn bộ.
-
-                scale = Math.max(
-                    displayWidth / img.width,
-                    displayHeight / img.height,
-                );
-
-                // Tính toán vị trí trung tâm
-                const x = (displayWidth - img.width * scale) / 2;
-                const y = (displayHeight - img.height * scale) / 2;
-
-                context.imageSmoothingEnabled = true;
-                context.imageSmoothingQuality = "high";
-
-                context.drawImage(
-                    img,
-                    x,
-                    y,
-                    img.width * scale,
-                    img.height * scale,
-                );
-
-                // Gradient Overlay (Giúp che khuyết điểm nếu ảnh bị vỡ hạt)
-                const radius = Math.max(displayWidth, displayHeight) * 0.4;
-                const gradient = context.createRadialGradient(
-                    displayWidth / 2,
-                    displayHeight / 2,
-                    0, // Tâm giữa màn hình
-                    displayWidth / 2,
-                    displayHeight / 2,
-                    radius * 2,
-                );
-                // Đảo ngược gradient một chút để tập trung vào giữa
-                // Gradient cũ của bạn ở góc phải dưới, mình giữ nguyên nhé:
-                const gradOld = context.createRadialGradient(
-                    displayWidth,
-                    displayHeight,
-                    0,
-                    displayWidth,
-                    displayHeight,
-                    Math.max(displayWidth, displayHeight) * 0.5,
-                );
-                gradOld.addColorStop(0, `rgba(249, 250, 251, 0.9)`);
-                gradOld.addColorStop(1, `rgba(249, 250, 251, 0)`);
-
-                context.fillStyle = gradOld;
-                context.fillRect(0, 0, displayWidth, displayHeight);
-            });
+            context.drawImage(
+                img,
+                x,
+                y,
+                img.width * scale,
+                img.height * scale,
+            );
         };
 
         // ... Khởi tạo ảnh (Phần này giữ nguyên logic của bạn) ...
@@ -252,7 +229,7 @@ export default function HeroScrollAnimation() {
                     id: "hero-scroll-animation",
                     trigger: container,
                     start: "top top",
-                    end: "+=2000",
+                    end: "+=2500",
                     scrub: 0.3,
                     pin: true,
                     // anticipiatePin giúp giảm giật trên mobile
@@ -265,40 +242,31 @@ export default function HeroScrollAnimation() {
             // Refresh để tính toán lại vị trí start/end
             ScrollTrigger.refresh();
 
-            // Animation Timeline (Giữ nguyên)
-            tl.to(canvas, {
-                opacity: 1,
-                filter: "blur(0px)",
-                duration: 1,
-                ease: "power2.out",
-            });
-            tl.fromTo(
-                textElement,
-                { opacity: 0, y: 50 },
-                { opacity: 1, y: 0, duration: 1 },
-                "<",
-            );
-            tl.to(textElement, { opacity: 0, y: -50, duration: 1 }, ">");
+            // Timeline UI/UX (tổng duration 10):
+            //   0% - 85% : chuỗi ảnh chạy trên canvas (nền hero luôn hiển thị ngay từ load)
+            //  15% - 25% : Intro fade-out + di chuyển lên (y: -80) để lộ cảnh
+            //  85% -100% : canvas fade-out sang section kế tiếp
+            // FIX #3: Intro không fade-in nữa (sẵn opacity: 1, y: 0) mà chỉ fade-out khi scroll.
             tl.to(
                 animationState,
                 {
                     frame: frameCount - 1,
                     snap: "frame",
                     ease: "none",
-                    duration: 10,
+                    duration: 8.5,
                     onUpdate: render,
                 },
                 0,
             );
             tl.to(
+                textElement,
+                { opacity: 0, y: -80, duration: 1, ease: "power2.in" },
+                1.5,
+            );
+            tl.to(
                 canvas,
-                {
-                    opacity: 0.1,
-                    filter: "blur(10px)",
-                    duration: 1.5,
-                    ease: "power2.in",
-                },
-                "-=1.5",
+                { opacity: 0, duration: 1.5, ease: "power2.in" },
+                8.5,
             );
         }
 
@@ -316,45 +284,58 @@ export default function HeroScrollAnimation() {
         return () => {
             window.removeEventListener("resize", handleResize);
             window.removeEventListener("orientationchange", handleResize);
-            ScrollTrigger.getAll().forEach((t) => t.kill());
+            ScrollTrigger.getAll().forEach(
+                (t) => t.trigger === container && t.kill(),
+            );
             if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
             if (minLoadTimeRef.current) clearTimeout(minLoadTimeRef.current);
             if (progressIntervalRef.current)
                 clearInterval(progressIntervalRef.current);
         };
-    }, []);
+    }, [isLight]);
 
     return (
         <section
             ref={containerRef}
-            // SỬA: my-0 cho mobile, my-[10rem] cho desktop
-            // SỬA: h-[100dvh] để fix lỗi thanh địa chỉ trình duyệt mobile
-            className='relative w-full overflow-hidden my-0 md:my-[10rem]'
-            style={{ height: "100dvh" }}
+            // FIX #1: Full-bleed tới đỉnh viewport (light mode). -mt đối trọng với
+            // pt-20 sm:pt-24 của layout wrapper để không còn "hở" phía trên.
+            className={`relative w-full overflow-hidden ${
+                isLight ? "-mt-20 sm:-mt-24" : ""
+            }`}
+            style={isLight ? { height: "100dvh" } : undefined}
         >
-            <div className='absolute inset-0 w-full h-full'>
-                <canvas
-                    ref={canvasRef}
-                    className='w-full h-full object-cover'
-                    style={{
-                        pointerEvents: "none",
-                        opacity: 0.1,
-                        filter: "blur(10px)",
-                        willChange: "opacity, transform, filter",
-                        transform: "translateZ(0)",
-                    }}
-                />
-            </div>
+            {/* Chỉ hiển thị canvas làm background trong LIGHT MODE */}
+            {isLight && (
+                <div className='absolute inset-0 w-full h-full'>
+                    {/* FIX #2: Bỏ filter blur khỏi canvas để ảnh sắc nét.
+                        opacity: 1 để nền ảnh (chuỗi scroll) hiển thị ngay khi load */}
+                    <canvas
+                        ref={canvasRef}
+                        className='w-full h-full object-cover'
+                        style={{
+                            pointerEvents: "none",
+                            opacity: 1,
+                            willChange: "opacity, transform",
+                            transform: "translateZ(0)",
+                        }}
+                    />
+                </div>
+            )}
 
+            {/* FIX #2: Gradient overlay dùng GPU (Tailwind) thay cho drawImage gradient trong render loop */}
+            {isLight && (
+                <div className='pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-white/60 via-transparent to-white/80 dark:from-neutral-950/60 dark:via-transparent dark:to-neutral-950/80' />
+            )}
+
+            {/* FIX #3: Intro hiện đầy đủ ngay khi load (opacity: 1, y:0), chỉ fade-out khi scroll */}
             <div
                 ref={textRef}
-                className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10 w-full px-4'
-                style={{ opacity: 0 }}
+                className={`${
+                    isLight ? "absolute inset-0" : "relative"
+                } z-20 flex w-full items-center justify-center px-4`}
+                style={{ opacity: 1 }}
             >
-                {/* SỬA: Giảm kích thước chữ một chút trên mobile (text-3xl) */}
-                <h2 className='text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-2'>
-                    Scroll to explore
-                </h2>
+                {children}
             </div>
         </section>
     );

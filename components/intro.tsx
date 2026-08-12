@@ -43,7 +43,7 @@ const Intro = () => {
         >
             <div className='flex items-center justify-center py-10'>
                 <div className='relative w-max'>
-                    <span className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-500 dark:text-gray-400 z-20 whitespace-nowrap pointer-events-none'>
+                    <span className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-500 dark:text-gray-100 z-20 whitespace-nowrap pointer-events-none rotate-[-35deg] -ml-16 -mb-16'>
                         KhaDonDev
                     </span>
 
@@ -59,9 +59,9 @@ const Intro = () => {
                         />
                     </div>
 
-                    <span className='text-4xl absolute bottom-0 right-0 z-20'>
+                    {/* <span className='text-4xl absolute bottom-0 right-0 z-20'>
                         👋
-                    </span>
+                    </span> */}
                 </div>
             </div>
 

@@ -78,9 +78,9 @@ const SVGbg = () => {
                     ease: "power1.out",
                     scrollTrigger: {
                         trigger: triggerEl,
-                        start: "top 90%",
-                        end: "bottom 40%",
-                        scrub: 0.4,
+                        start: "top 70%",
+                        end: "bottom 30%",
+                        scrub: 0.1,
                         invalidateOnRefresh: true,
                     },
                 });
@@ -103,7 +103,7 @@ const SVGbg = () => {
             className='svg-bg-container z-[-1000]'
             style={{
                 position: "absolute",
-                top: 0,
+                top: 100,
                 left: 0,
                 width: "100%",
                 height: "100%",
