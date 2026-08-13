@@ -8,6 +8,11 @@ import { useTheme } from "@/context/theme-context";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Cache ảnh frame ở MODULE SCOPE (dùng chung cho mọi lần mount / đổi theme).
+// Khi chuyển dark -> light, effect chạy lại nhưng các HTMLImageElement này đã
+// được load & decode sẵn => KHÔNG tải lại ảnh, dựng animation tức thì.
+const scrollFrameCache = new Map<string, HTMLImageElement>();
+
 // Chỉ bật normalizeScroll nếu thực sự cần thiết, đôi khi nó gây conflict cuộn trên mobile
 // ScrollTrigger.normalizeScroll(true);
 
@@ -50,14 +55,25 @@ export default function HeroScrollAnimation({
         const context = canvas.getContext("2d", { alpha: false });
         if (!context) return;
 
-        // Số frame thực tế trên disk: ezgif-frame-017.png ... ezgif-frame-120.png (104 frame)
-        const frameCount = 104;
-        const FRAME_OFFSET = 16; // index 1 -> file 017
+        // WEBP frames trên disk: frame-012.webp ... frame-080.webp (69 frame)
+        const frameCount = 69;
+        const FRAME_OFFSET = 11; // index 1 -> file 012, index 69 -> file 080
         const currentFrame = (index: number) =>
-            `/assets/snow/ezgif-frame-${String(index + FRAME_OFFSET).padStart(
+            `/assets/frames/frame-${String(index + FRAME_OFFSET).padStart(
                 3,
                 "0",
-            )}.png`;
+            )}.webp`;
+
+        // Lấy ảnh từ cache nếu có, nếu chưa thì tạo mới (reuse khi đổi theme).
+        const getFrameImage = (index: number): HTMLImageElement => {
+            const src = currentFrame(index);
+            let img = scrollFrameCache.get(src);
+            if (!img) {
+                img = new Image();
+                scrollFrameCache.set(src, img);
+            }
+            return img;
+        };
 
         // --- CẤU HÌNH MOBILE ---
         // Kiểm tra mobile để tối ưu
@@ -88,7 +104,10 @@ export default function HeroScrollAnimation({
         };
         setCanvasSize();
 
-        const images: HTMLImageElement[] = [];
+        const images: HTMLImageElement[] = Array.from(
+            { length: frameCount },
+            (_, i) => getFrameImage(i + 1),
+        );
         const animationState = { frame: 0 };
         let loadedCount = 0;
 
@@ -133,21 +152,21 @@ export default function HeroScrollAnimation({
             finishLoading();
         }, 20000);
 
-        // Helper Loading Batch (Giữ nguyên code cũ của bạn)
+        // Helper Loading Batch (cache-aware: ảnh đã load/decode rồi thì bỏ qua)
         const loadImageBatch = async (start: number, end: number) => {
             const promises = [];
             for (let i = start; i < end && i < frameCount; i++) {
-                const img = images[i];
-                if (!img) continue;
+                const img = images[i] ?? getFrameImage(i + 1);
+                images[i] = img;
+                // Đã cache & decode đủ từ lần trước -> không tải lại
+                if (img.complete && img.naturalWidth > 0) continue;
                 const p = new Promise<void>((resolve) => {
-                    img.onload = () => {
+                    const done = () => {
                         loadedCount++;
                         resolve();
                     };
-                    img.onerror = () => {
-                        loadedCount++;
-                        resolve();
-                    };
+                    img.onload = done;
+                    img.onerror = done;
                     img.src = currentFrame(i + 1);
                 });
                 promises.push(p);
@@ -200,16 +219,15 @@ export default function HeroScrollAnimation({
             context.drawImage(img, x, y, img.width * scale, img.height * scale);
         };
 
-        // ... Khởi tạo ảnh (Phần này giữ nguyên logic của bạn) ...
-        for (let i = 0; i < frameCount; i++) {
-            images.push(new Image());
-        }
+        // --- LOAD / INIT (cache-aware) ---
+        // images[] đã lấy từ cache ở trên. Kiểm tra xem tất cả đã load & decode
+        // chưa: nếu đã cache từ lần đổi theme trước -> dựng ngay, KHÔNG tải lại.
         const firstImg = images[0];
-        firstImg.onload = () => {
-            loadedCount++;
-            render();
-            initAnimation();
-            // Load các ảnh còn lại
+        const alreadyCached = images.every(
+            (img) => img.complete && img.naturalWidth > 0,
+        );
+
+        const loadRest = () => {
             (async () => {
                 await loadImageBatch(1, 15);
                 for (let i = 15; i < frameCount; i += BATCH_SIZE) {
@@ -217,7 +235,20 @@ export default function HeroScrollAnimation({
                 }
             })();
         };
-        firstImg.src = currentFrame(1);
+
+        if (alreadyCached) {
+            // Đã load xong trước đó (vd. vừa đổi dark -> light): không tải lại
+            render();
+            initAnimation();
+        } else {
+            firstImg.onload = () => {
+                loadedCount++;
+                render();
+                initAnimation();
+                loadRest();
+            };
+            firstImg.src = currentFrame(1);
+        }
 
         function initAnimation() {
             // Kill old triggers
@@ -351,10 +382,14 @@ export default function HeroScrollAnimation({
                         className='pointer-events-none absolute inset-0 z-10 h-full w-full'
                         ref={overlayRef}
                     >
-                        {/* Gradient xám lạnh nhẹ */}
-                        <div className='absolute inset-0 h-full w-full bg-gradient-to-b from-slate-200/70 via-blue-50/20 to-slate-200/80' />
-                        {/* Scrim xám ngay tâm để chữ tối màu đọc rõ hơn */}
-                        <div className='absolute inset-0 h-full w-full [background:radial-gradient(ellipse_55%_60%_at_center,rgba(226,232,240,0.65),transparent_70%)]' />
+                        {/* Lớp chính: blur nhẹ + nền trắng mờ vừa phải + radial mask */}
+                        <div className='absolute inset-0 h-full w-full backdrop-blur-[3px] bg-white/25 [mask-image:radial-gradient(ellipse_75%_70%_at_center,black_35%,transparent_78%)]' />
+
+                        {/* Scrim radial ở giữa (quan trọng nhất) — giúp text đọc rõ trên vùng trung tâm */}
+                        <div className='absolute inset-0 h-full w-full bg-[radial-gradient(ellipse_60%_55%_at_center,rgba(255,255,255,0.45)_0%,transparent_70%)]' />
+
+                        {/* Viền trên/dưới rất nhẹ để chuyển tiếp mượt */}
+                        <div className='absolute inset-0 h-full w-full bg-gradient-to-b from-slate-100/30 via-transparent to-slate-200/40' />
                     </div>
                 )}
 
