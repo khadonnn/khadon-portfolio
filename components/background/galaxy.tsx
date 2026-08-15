@@ -19,10 +19,10 @@ function GalaxyHero() {
     }, [theme]);
 
     return (
-        <div className='fixed inset-0 w-full h-full overflow-hidden z-[-1] bg-[#f8f9fa] dark:bg-black'>
+        <div className='fixed inset-0 w-full h-full overflow-hidden z-[-1] bg-[#f8f9fa] dark:bg-black pointer-events-none'>
             {/* --- LIGHT MODE: CSS Mesh Gradient + Noise --- */}
             <div
-                className={`absolute inset-0 w-full h-full bg-[#f8f9fa] overflow-hidden transition-opacity duration-700 ${theme === "light" ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                className={`absolute inset-0 w-full h-full bg-[#f8f9fa] overflow-hidden transition-opacity duration-700 pointer-events-none ${theme === "light" ? "opacity-100" : "opacity-0"}`}
             >
                 <div className='absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-pink-200/60 rounded-full blur-[120px] mix-blend-multiply'></div>
                 <div className='absolute -top-[10%] -right-[10%] w-[50%] h-[50%] bg-blue-200/60 rounded-full blur-[120px] mix-blend-multiply'></div>
@@ -50,7 +50,7 @@ function GalaxyHero() {
                 muted
                 playsInline
                 src='/assets/video_bg/galaxy.mp4'
-                className={`absolute top-0 left-0 w-full h-full object-cover object-top transition-opacity duration-700 ${theme === "dark" ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                className={`absolute top-0 left-0 w-full h-full object-cover object-top transition-opacity duration-700 pointer-events-none ${theme === "dark" ? "opacity-100" : "opacity-0"}`}
             />
 
             <div className='absolute inset-0 dark:bg-black/5 pointer-events-none transition-colors duration-300'></div>
