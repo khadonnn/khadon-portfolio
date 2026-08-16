@@ -9,6 +9,9 @@ import kblog from "@/public/kblog.png";
 import chatMee from "@/public/chat-mee.png";
 import store_shop from "@/public/store_shop.png";
 import liveCode from "@/public/live-code.png";
+import groceryStore from "@/public/grocery-store.png";
+import stazyTravel from "@/public/demo/stazy-travel.png";
+import clothy_store from "@/public/demo/clothy-store.png";
 export const links = [
     {
         name: "Home",
@@ -112,6 +115,48 @@ export const certificates = [
 ] as const;
 export const projectsData = [
     {
+        title: "Stazy Travel",
+        description:
+            "An AI-powered hotel booking platform built with event-driven microservices, featuring Kafka, Saga and Outbox patterns, hybrid recommendations, NLP sentiment analysis, and asynchronous AI processing.",
+        tags: [
+            "TypeScript",
+            "Next.js",
+            "Microservices",
+            "PostgreSQL",
+            "Kafka",
+            "Redis",
+            "Python",
+            "AI/ML",
+            "Prisma",
+            "BullMQ",
+            "Docker",
+            "TanStack",
+            "LLMs",
+            "RAG",
+            "Collaborative Filtering",
+        ],
+        imageUrl: stazyTravel,
+        url: "https://github.com/khadonnn/stazy_travel",
+    },
+    {
+        title: "Grocery Store",
+        description:
+            "A modern grocery e-commerce platform built with React and Node.js, featuring product browsing, filtering, cart management, checkout, order history, address management, and an admin dashboard.",
+        tags: [
+            "React",
+            "TypeScript",
+            "Vite",
+            "Node.js",
+            "Express",
+            "Prisma",
+            "PostgreSQL",
+            "Tailwind",
+            "Cloudinary",
+        ],
+        imageUrl: groceryStore,
+        url: "https://github.com/khadonnn/grocery-store-",
+    },
+    {
         title: "Live-Code Platform",
         description:
             "A full-stack real-time technical interview platform with video calling, code editor, and collaborative features.",
@@ -157,16 +202,35 @@ export const projectsData = [
             "Arcjet",
         ],
         imageUrl: pern_store,
-        url: "https://pern-store-fs5d.onrender.com/",
+        url: "https://github.com/khadonnn/pern-store",
     },
 
+    // {
+    //     title: "Store Shop",
+    //     description:
+    //         "This website offers fashion products and furniture with convenient shopping features, high quality, and beauty designs.",
+    //     tags: ["React", "Next.js", "Wix", "Tailwind", "Stripe", "Zustand"],
+    //     imageUrl: store_shop,
+    //     url: "https://nextjs-shop-ten-tawny.vercel.app/",
+    // },
     {
-        title: "Store Shop",
+        title: "Clothy Store ",
         description:
-            "This website offers fashion products and furniture with convenient shopping features, high quality, and beauty designs.",
-        tags: ["React", "Next.js", "Wix", "Tailwind", "Stripe", "Zustand"],
-        imageUrl: store_shop,
-        url: "https://nextjs-shop-ten-tawny.vercel.app/",
+            "A complete e-commerce demo featuring two Next.js applications — a customer-facing fashion store with product zoom, cart, checkout, and an admin dashboard for managing products, users, and payments with rich data visualization.",
+        tags: [
+            "React",
+            "Next.js",
+            "TypeScript",
+            "Tailwind CSS",
+            "Zustand",
+            "shadcn/ui",
+            "TanStack Table",
+            "Recharts",
+            "React Hook Form",
+            "Zod",
+        ],
+        imageUrl: clothy_store,
+        url: "https://github.com/khadonnn/clothy-store",
     },
     {
         title: "Blog App",
