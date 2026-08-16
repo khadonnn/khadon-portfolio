@@ -55,9 +55,9 @@ export default function HeroScrollAnimation({
         const context = canvas.getContext("2d", { alpha: false });
         if (!context) return;
 
-        // WEBP frames trên disk: frame-012.webp ... frame-080.webp (69 frame)
-        const frameCount = 69;
-        const FRAME_OFFSET = 11; // index 1 -> file 012, index 69 -> file 080
+        // WEBP frames trên disk: frame-012.webp ... frame-041.webp (30 frame)
+        const frameCount = 30;
+        const FRAME_OFFSET = 11; // index 1 -> file 012, index 30 -> file 041
         const currentFrame = (index: number) =>
             `/assets/frames/frame-${String(index + FRAME_OFFSET).padStart(
                 3,
@@ -261,7 +261,11 @@ export default function HeroScrollAnimation({
                     id: "hero-scroll-animation",
                     trigger: container,
                     start: "top top",
-                    end: "+=2200",
+                    // Pin cuộn tỉ lệ theo số frame (~32px/frame, giữ cảm giác như bản
+                    // gốc 69 frame @ 2200px). Với 30 frame => ~960px: frame cuối (041)
+                    // hiện đúng lúc hết pin => About trượt vào ngay, không còn khoảng
+                    // cuộn thừa ở ảnh cuối. Nếu đổi frameCount thì end tự co theo.
+                    end: () => `+=${frameCount * 32}`,
                     scrub: 0.3,
                     pin: true,
                     // anticipiatePin giúp giảm giật trên mobile
@@ -274,11 +278,12 @@ export default function HeroScrollAnimation({
             // Refresh để tính toán lại vị trí start/end
             ScrollTrigger.refresh();
 
-            // Timeline UI/UX (pin 2200px):
-            //   0% - 85% : chuỗi ảnh chạy trên canvas (nền hero hiển thị từ lúc load)
-            //  15% - 25% : Intro fade-out + di chuyển lên (y: -80) để lộ cảnh
-            //  85% -100% : frame cuối giữ nguyên (OPACITY VẪN 1 — không fade-out)
-            //              tới khi hết pin thì About trượt lên thay thế.
+            // Timeline UI/UX (pin = frameCount × 32 ≈ 960px với 30 frame):
+            //   0% - 82% : chuỗi ảnh chạy trên canvas (nền hero hiển thị từ lúc load)
+            //  18% - 29% : Intro fade-out + di chuyển lên (y: -80) để lộ cảnh
+            //  82% -100% : frame cuối (frame-041) giữ nguyên (OPACITY VẪN 1 — không
+            //              fade-out) tới khi hết pin => About trượt lên thay thế ngay,
+            //              không còn khoảng cuộn thừa sau ảnh cuối.
             // FIX #3: Intro không fade-in nữa (sẵn opacity: 1, y: 0) mà chỉ fade-out khi scroll.
             tl.to(
                 animationState,

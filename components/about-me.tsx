@@ -10,7 +10,7 @@ import { useSectionInView } from "@/lib/hooks";
 gsap.registerPlugin(ScrollTrigger);
 
 const STATS = [
-    { label: "Years of Coding", target: 2, suffix: "+" },
+    { label: "Years of coding", target: 1, suffix: "+" },
     { label: "Projects Built", target: 12, suffix: "+" },
     { label: "Technologies Learned", target: 10, suffix: "+" },
     { label: "GitHub Repositories", target: 40, suffix: "+" },

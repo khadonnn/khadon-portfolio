@@ -117,7 +117,7 @@ export const projectsData = [
     {
         title: "Stazy Travel",
         description:
-            "An AI-powered hotel booking platform built with event-driven microservices, featuring Kafka, Saga and Outbox patterns, hybrid recommendations, NLP sentiment analysis, and asynchronous AI processing.",
+            "An AI-powered hotel booking platform built with event-driven microservices",
         tags: [
             "TypeScript",
             "Next.js",
@@ -131,9 +131,6 @@ export const projectsData = [
             "BullMQ",
             "Docker",
             "TanStack",
-            "LLMs",
-            "RAG",
-            "Collaborative Filtering",
         ],
         imageUrl: stazyTravel,
         url: "https://github.com/khadonnn/stazy_travel",
@@ -141,7 +138,7 @@ export const projectsData = [
     {
         title: "Grocery Store",
         description:
-            "A modern grocery e-commerce platform built with React and Node.js, featuring product browsing, filtering, cart management, checkout, order history, address management, and an admin dashboard.",
+            "A modern grocery e-commerce platform with a user-friendly interface.",
         tags: [
             "React",
             "TypeScript",
@@ -216,7 +213,7 @@ export const projectsData = [
     {
         title: "Clothy Store ",
         description:
-            "A complete e-commerce demo featuring two Next.js applications — a customer-facing fashion store with product zoom, cart, checkout, and an admin dashboard for managing products, users, and payments with rich data visualization.",
+            "A complete fashion e-commerce platform with customer shopping, checkout, and an admin dashboard.",
         tags: [
             "React",
             "Next.js",
@@ -226,7 +223,6 @@ export const projectsData = [
             "shadcn/ui",
             "TanStack Table",
             "Recharts",
-            "React Hook Form",
             "Zod",
         ],
         imageUrl: clothy_store,
