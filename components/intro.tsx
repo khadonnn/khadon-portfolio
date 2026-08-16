@@ -73,7 +73,7 @@ const Intro = () => {
 
             <h2 className='mb-10 mt-4 px-4 text-xl font-medium !leading-[1.5] sm:text-3xl '>
                 <b>Hi, I'm Khadondev.</b> A{" "}
-                <b>self-taught Full-stack Developer</b> with 8 months of
+                <b>self-taught Full-stack Developer</b> with more than 1 year of
                 hands-on experience, passionate about building <i>web & apps</i>
                 .
                 <span className='hidden md:inline'>
