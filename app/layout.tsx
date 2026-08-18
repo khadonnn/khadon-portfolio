@@ -20,7 +20,7 @@ import Footer from "@/components/footer";
 import ThemeSwitch from "@/components/theme-switch";
 import BackgroundBlurs from "@/components/background-blurs";
 import CertificateHoverMenu from "@/components/CertificateHoverMenu";
-import GalaxyHero from "@/components/background/galaxy";
+import SeaStormHero from "@/components/background/sea-storm";
 
 const SITE_URL = "https://www.khadon.io.vn/";
 
@@ -76,7 +76,7 @@ export default function RootLayout({
                 />
                 <BackgroundBlurs />
                 <ThemeContextProvider>
-                    <GalaxyHero />
+                    <SeaStormHero />
                     <ActiveSectionContextProvider>
                         <LoadingProvider videoSrc='/assets/video_bg/galaxy.mp4'>
                             <Header />

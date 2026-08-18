@@ -183,7 +183,7 @@ export function About() {
             id='about'
             className='w-full bg-white/70 border-t border-black/[0.08] '
         >
-            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] pt-[clamp(3rem,7vw,8rem)]'>
+            <div className='max-w-[1440px] mx-auto px-[clamp(1.25rem,5vw,5rem)] pt-[clamp(5rem,10vw,12rem)]'>
                 {/* Section label */}
                 <div className='flex items-center gap-4 mb-[clamp(2rem,4vw,4rem)]'>
                     <motion.span
