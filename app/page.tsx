@@ -18,7 +18,7 @@ export default function Home() {
     const isDesktop = useIsDesktop();
     return (
         <>
-            <header className='relative z-20 flex w-full flex-col items-center px-4 mb-28 sm:mb-28 scroll-mt-28'>
+            <header className='relative z-20 flex w-full flex-col items-center px-4 scroll-mt-28'>
                 <Intro />
             </header>
             {/* <QuoteSection /> */}

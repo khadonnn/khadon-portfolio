@@ -274,15 +274,15 @@ export function LoadingProvider({ children, videoSrc }: LoadingProviderProps) {
                             <div className='absolute inset-0 rounded-full border-4 border-t-pink-500 animate-spin' />
                         </div>
                         <div className='progress-container w-64'>
-                            <div className='h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
+                            {/* <div className='h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
                                 <div
                                     className='h-full bg-gradient-to-r from-pink-500 via-purple-500 to-violet-500 transition-all duration-100'
                                     style={{
                                         width: `${Math.min(loadProgressValue, 100)}%`,
                                     }}
                                 />
-                            </div>
-                            <p className='text-center text-xs text-gray-500 dark:text-gray-400 mt-2 font-mono'>
+                            </div> */}
+                            <p className='text-center text-xl text-gray-500 dark:text-gray-400 mt-2 font-mono'>
                                 {Math.min(loadProgressValue, 100)}%
                             </p>
                         </div>

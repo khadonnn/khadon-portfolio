@@ -38,7 +38,7 @@ const Intro = () => {
     return (
         <section
             id='home'
-            className='relative mb-28 max-w-[50rem] text-center sm:mb-0 scroll-mt-[100rem]'
+            className='relative mb-28 flex min-h-[calc(100dvh-5rem)] max-w-[50rem] flex-col items-center justify-center text-center sm:mb-0 sm:min-h-[calc(100dvh-6rem)] scroll-mt-[100rem]'
             ref={ref}
         >
             <div className='flex items-center justify-center py-10'>
