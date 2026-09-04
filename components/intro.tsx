@@ -38,10 +38,10 @@ const Intro = () => {
     return (
         <section
             id='home'
-            className='relative mb-28 flex min-h-[calc(100dvh-5rem)] max-w-[50rem] flex-col items-center justify-center text-center sm:mb-0 sm:min-h-[calc(100dvh-6rem)] scroll-mt-[100rem]'
+            className='relative mb-28 flex min-h-[calc(100dvh-5rem)] max-w-[50rem] flex-col items-center justify-start text-center sm:mb-0 sm:min-h-[calc(100dvh-6rem)] scroll-mt-[100rem]'
             ref={ref}
         >
-            <div className='flex items-center justify-center py-10'>
+            <div className='flex items-center justify-center py-10 sm:py-14'>
                 <div className='relative w-max'>
                     <span
                         className='absolute top-8 left-full text-2xl md:text-4xl font-pencerio font-thin text-gray-900 dark:text-gray-100 z-20 whitespace-nowrap pointer-events-none rotate-[-35deg] -ml-16 -mb-16'
