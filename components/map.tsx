@@ -161,16 +161,16 @@ export default function MapComponent({
                     }
                 };
                 // Choose map tiles based on theme
+                // Bản đồ Esri xám trắng chuẩn tối giản
                 const lightTiles =
-                    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+                    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
                 const darkTiles =
-                    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+                    "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png";
 
                 L.tileLayer(theme === "dark" ? darkTiles : lightTiles, {
                     attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-                    subdomains: "abcd",
-                    maxZoom: 20,
+                        "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
+                    maxZoom: 16,
                 }).addTo(map);
 
                 const bounds = L.latLngBounds([]);

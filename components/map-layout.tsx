@@ -271,12 +271,20 @@ export default function MapLayout({ places }: { places?: Place[] }) {
                                         onClick={() => setSelected(place)}
                                     >
                                         <div
-                                            className={`rounded-2xl border p-4 transition-all duration-200 ${isActive ? "border-amber-400 bg-amber-400/10 shadow-[0_0_0_1px_rgba(245,158,11,0.18)]" : "border-border/60 bg-card/70 hover:border-amber-400/60 hover:bg-muted/40"}`}
+                                            className={`rounded-2xl border p-4 transition-all duration-200 ${
+                                                isActive
+                                                    ? "active-filter"
+                                                    : "border-border/60 bg-card/70 hover:border-foreground/70 hover:bg-muted/50 dark:hover:border-amber-400/60"
+                                            }`}
                                         >
-                                            <div className='text-sm font-semibold text-foreground'>
+                                            <div
+                                                className={`text-sm font-semibold ${isActive ? "text-white" : "text-foreground"}`}
+                                            >
                                                 {label}
                                             </div>
-                                            <div className='mt-1 text-xs text-muted-foreground'>
+                                            <div
+                                                className={`mt-1 text-xs ${isActive ? "text-white/80" : "text-muted-foreground"}`}
+                                            >
                                                 {[place.category, place.city]
                                                     .filter(Boolean)
                                                     .join(" · ")}

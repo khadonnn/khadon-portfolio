@@ -90,8 +90,14 @@ html.dark {
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
+        --active-filter-border: #d97706;
+        --active-filter-bg: rgba(217, 119, 6, 0.12);
+        --active-filter-text: #b45309;
     }
     .dark {
+        --active-filter-border: #f59e0b;
+        --active-filter-bg: rgba(245, 158, 11, 0.2);
+        --active-filter-text: #fbbf24;
         --background: 222.2 84% 4.9%;
         --foreground: 210 40% 98%;
         --card: 222.2 84% 4.9%;
@@ -573,10 +579,20 @@ html.dark {
     overflow: visible;
 }
 
+/* 1. Mặc định cho Light Mode: Đậm nét, nền tương phản mạnh, chữ nổi rõ */
 .active-filter {
+    border-color: hsl(var(--primary, 222.2 47.4% 11.2%)) !important;
+    background-color: hsl(var(--primary, 222.2 47.4% 11.2%)) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 2. Khi ở Dark Mode: Giữ lại màu Amber/Vàng nổi bật trên nền tối */
+.dark .active-filter {
     border-color: #f59e0b !important;
-    background-color: rgba(245, 158, 11, 0.1) !important;
-    color: #f59e0b !important;
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    color: #fbbf24 !important;
+    box-shadow: none !important;
 }
 
 .map-custom-popup .leaflet-popup-content-wrapper {
